@@ -1,12 +1,10 @@
 import React from 'react';
-import TopBar from '../components/HomePage/TopBar.jsx';
-import Header from '../components/HomePage/Header.jsx';
+import Layout from '../components/Layout/Layout';
 import Hero from '../components/HomePage/Hero.jsx';
 import PromoBanner from '../components/HomePage/PromoBanner.jsx';
 import ProductCard from '../components/HomePage/ProductCard.jsx';
 import FeaturesRow from '../components/HomePage/FeaturesRow.jsx';
 import CategoryList from '../components/HomePage/CategoryList.jsx';
-import Footer from '../components/Footer/Footer.jsx';
 
 // Figma-hosted banners
 const banner1 = "https://s3-alpha-sig.figma.com/img/7ac8/3d91/a514414092bc8acdb6b985c046f78c8b?Expires=1759708800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=CI~ZZRfKg3aG~wfun-acaicE7RV9F22-m4kisJ3FWlKkk9aw82HZ57Okee95QGAuUDBmdwrdZ7G6BIWx64qHnp3VQCR0HUU-UcM5u1lbWyIukQjmV7ttwNBpM5j-ujO2EgaJu~6qER0ZNgbLjZ65h4j49cNJJzoAzZWRNwH9nqDp5IqSUP~hFHBwq3BOlikxPMziyg1WQGOBAGkjapnQD22J~7V8nYoxjnqvxu3ZfJRXAGVWhHh~SmiHWQrJZ91qWF2XdoESHgyFMfR9Km2Nem4tt4ni-YekemzshvkvQ-sJZ5NiUglVG6MqYIoe239uoUocsQadGy9K4GKKt2FaQ__";
@@ -54,11 +52,8 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-dvh bg-white text-gray-900">
-      <TopBar />
-      <Header />
-
-      <main className="mx-auto max-w-[1200px] px-4">
+    <Layout>
+      <div className="mx-auto max-w-[1200px] px-4">
         <div className="mt-6">
           <Hero />
         </div>
@@ -114,9 +109,8 @@ export default function HomePage() {
             ))}
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+      </div>
+    </Layout>
   );
 }
 

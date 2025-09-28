@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Header() {
   return (
@@ -7,7 +8,7 @@ export default function Header() {
         <Brand />
         <SearchBar />
         <div className="ml-auto flex items-center gap-4 text-sm">
-          <a className="text-gray-600 hover:text-gray-900" href="#">Sign In</a>
+          <Link to="/login" className="text-gray-600 hover:text-gray-900">Sign In</Link>
           <a className="text-gray-600 hover:text-gray-900" href="#">Account</a>
           <a className="relative text-gray-600 hover:text-gray-900" href="#" aria-label="Cart">
             <span className="i">🛒</span>
