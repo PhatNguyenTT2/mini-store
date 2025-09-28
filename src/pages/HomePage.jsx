@@ -1,10 +1,12 @@
 import React from 'react';
-import TopBar from '../components/TopBar.jsx';
-import Header from '../components/Header.jsx';
-import Hero from '../components/Hero.jsx';
-import PromoBanner from '../components/PromoBanner.jsx';
-import ProductCard from '../components/ProductCard.jsx';
-import FeaturesRow from '../components/FeaturesRow.jsx';
+import TopBar from '../components/HomePage/TopBar.jsx';
+import Header from '../components/HomePage/Header.jsx';
+import Hero from '../components/HomePage/Hero.jsx';
+import PromoBanner from '../components/HomePage/PromoBanner.jsx';
+import ProductCard from '../components/HomePage/ProductCard.jsx';
+import FeaturesRow from '../components/HomePage/FeaturesRow.jsx';
+import CategoryList from '../components/HomePage/CategoryList.jsx';
+import Footer from '../components/Footer/Footer.jsx';
 
 // Figma-hosted banners
 const banner1 = "https://s3-alpha-sig.figma.com/img/7ac8/3d91/a514414092bc8acdb6b985c046f78c8b?Expires=1759708800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=CI~ZZRfKg3aG~wfun-acaicE7RV9F22-m4kisJ3FWlKkk9aw82HZ57Okee95QGAuUDBmdwrdZ7G6BIWx64qHnp3VQCR0HUU-UcM5u1lbWyIukQjmV7ttwNBpM5j-ujO2EgaJu~6qER0ZNgbLjZ65h4j49cNJJzoAzZWRNwH9nqDp5IqSUP~hFHBwq3BOlikxPMziyg1WQGOBAGkjapnQD22J~7V8nYoxjnqvxu3ZfJRXAGVWhHh~SmiHWQrJZ91qWF2XdoESHgyFMfR9Km2Nem4tt4ni-YekemzshvkvQ-sJZ5NiUglVG6MqYIoe239uoUocsQadGy9K4GKKt2FaQ__";
@@ -15,7 +17,7 @@ const banner4 = "https://s3-alpha-sig.figma.com/img/21b6/bd03/5eea28c5e0ed5e3d72
 const banner5 = "https://s3-alpha-sig.figma.com/img/028b/d3e0/be09d11eecbcaed8a6f29bd45634036d?Expires=1759708800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U9zs8fAWL3Sp1HCw8davVcXjfYV7T5vlkB2x00Bh6h27nihrqQ9m5nchGQCimW6mmBWJv19gQorn-4LTCbLjOVwJT68cja-v5LboKDQJCRiEq6YBcgpCFdcyI9hRj5xLBPJOFk0Xyu2nZHS3V30nR6sy0SmrKMNNGd3c4Vd0UkueaX6-NqPHg1TYRbxyUDM4XE6vze8aYrYEfmZHYkvxghk1OAlUz3oLun7GEg~sML5JabOrbbPKUu5WoT-XnRcWPY12JcF8pKTUaVajb~gHhiVfIqweWo3XnGm4hLEa4Xi2VOnYzLh5gF46z-ODWPrRFwJM6jl4JASA0SqUAKMIBg__";
 const banner6 = "https://s3-alpha-sig.figma.com/img/0bee/bf5a/c8c4cc9b06e74bc6f266d91a07b3a6d6?Expires=1759708800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=eUXKy~gtVsyXRiJfRSlMMZb6wdWMM~XfHIoqsSJZnDlG9eW9-RXDNfFhlW84mJ7zkzwqU7qKgBiNvGgS4BgBq8H3yUWDObqDqKe5LNIiCmmkiBPUgJGpHf87IrTMft1v-wkxHQWC2jx0ZVP6p86TJYhq0V0cDZOWOr6aFqkn56enlv9X-6KRztoiag0hsBJBFPOgYhSnekiRYEhOWWCzQ9tnaZ~FLi-0ylGg7oF-MOtokckhoJY0B3uhEVH9R0uRfL7yfyguOMcFtHIxb0T8c-bpxk3-accd3NBZjwIK5pB7xrvWgsLXzvMNH9k~jt-tlNi6XVIBJMwPVDBeFM~73A__";
 
-export default function HomeScreen() {
+export default function HomePage() {
   const products = [
     {
       image: 'https://s3-alpha-sig.figma.com/img/21b6/bd03/5eea28c5e0ed5e3d72ca77de10fb670f?Expires=1759708800&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=mz2eAA2QWy~sc1NVhYef01SxAM3J8PhFMj7YxekvihuhztoOvn49qgyIPCWIs~8H~u5BQOceSiy7JsBZMxhR~CtVPILmLU~AS3bVF6-DX31FJCV3Y2a05WH5XfvcFaX~dBzavMRszLkjUh48VIkBlEqV2fjlxVOB2tT1g~YY1~xvv0sooU7dHj9EpJLjDVZ68~kWpCaQDdxsy93GiWm1bLW8sLrq48OQoSfz-fdXeKyoo71A2H5ntmZKLQ4B7qAjlaRZD5CR-FSRzO1-DoSG-NFHOpZc18hPI~uBr0aK8tJfpudcSLH4QE~YkA7xS6we1wcGOC1Eq6OcCHyWTqfvlg__',
@@ -60,6 +62,8 @@ export default function HomeScreen() {
         <div className="mt-6">
           <Hero />
         </div>
+
+        <CategoryList />
 
         <FeaturesRow />
 
@@ -111,6 +115,7 @@ export default function HomeScreen() {
           </div>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

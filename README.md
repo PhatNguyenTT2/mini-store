@@ -67,7 +67,22 @@ npm run dev
 
 The application will be available at `http://localhost:5173`
 
-## 📜 Available Scripts
+## � Project Progress (as of 2025-09-28)
+
+The following components have been implemented and integrated into the `HomePage`:
+
+- **`TopBar`**: Displays top-level navigation and contact information.
+- **`Header`**: Contains the main logo, search bar, and user account/cart icons.
+- **`Hero`**: The main hero section with a call-to-action.
+- **`BannerList`**: A component to display a list of promotional banners.
+- **`CategoryList`**: Shows a grid of product categories.
+- **`FeaturesRow`**: Highlights key features like free shipping, support, etc.
+- **`PromoBanner`**: A large promotional banner section.
+- **`Footer`**: The website footer, including newsletter signup, navigation links, and contact information.
+
+All components are built using **React** and styled with **Tailwind CSS**. The icon library in use is **lucide-react**.
+
+## �📜 Available Scripts
 
 In the project directory, you can run:
 
