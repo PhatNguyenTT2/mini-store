@@ -163,3 +163,406 @@ Dự án Mini Store được thiết kế để khắc phục những nhược �
     - API-ready architecture để integrate với backend services
     - Environment configuration cho development/staging/production
     - Plugin architecture support cho third-party integrations
+
+# Chương 2. CƠ SỞ LÝ THUYẾT
+
+## 2.1. Tổng quan về công nghệ Frontend hiện đại
+
+### 2.1.1. Single Page Application (SPA)
+
+Single Page Application là một kiểu ứng dụng web hoạt động trong một trang duy nhất và cập nhật nội dung động mà không cần tải lại trang. Mini Store được xây dựng theo mô hình SPA với những ưu điểm:
+
+- **Trải nghiệm người dùng mượt mà**: Chuyển đổi giữa các trang không có độ trễ do không cần reload
+- **Hiệu suất cao**: Tải dữ liệu cần thiết thông qua AJAX/API calls
+- **Tương tác phong phú**: Hỗ trợ các animation và transition phức tạp
+- **Offline capability**: Có thể cache dữ liệu để hoạt động offline
+
+### 2.1.2. Component-Based Architecture
+
+Kiến trúc dựa trên component là nền tảng của React và được áp dụng nhất quán trong Mini Store:
+
+```
+src/components/
+├── HomePage/           # Components cho trang chủ
+│   ├── Hero.jsx       # Banner chính
+│   ├── ProductCard.jsx # Card sản phẩm
+│   ├── CategoryList.jsx # Danh sách danh mục
+│   └── PromoBanner.jsx # Banner khuyến mãi
+├── Layout/            # Layout components
+│   ├── Layout.jsx     # Layout chung
+│   └── LayoutAdmin.jsx # Layout admin
+└── Header/            # Header components
+    ├── Header.jsx     # Header chính
+    └── TopBar.jsx     # Top navigation
+```
+
+**Nguyên tắc thiết kế component**:
+- **Reusability**: Mỗi component có thể tái sử dụng ở nhiều nơi
+- **Single Responsibility**: Mỗi component chỉ đảm nhận một chức năng cụ thể
+- **Props-driven**: Nhận dữ liệu thông qua props để đảm bảo tính linh hoạt
+- **Composition over Inheritance**: Kết hợp các component nhỏ để tạo component lớn
+
+## 2.2. React.js Framework
+
+### 2.2.1. Giới thiệu React
+
+React là một JavaScript library được phát triển bởi Facebook (Meta) để xây dựng user interface, đặc biệt phù hợp với Single Page Applications. Mini Store sử dụng React phiên bản 19.1.1 - phiên bản mới nhất với nhiều cải tiến về hiệu suất.
+
+### 2.2.2. Tính năng chính của React
+
+**Virtual DOM**:
+React sử dụng Virtual DOM để tối ưu hóa việc cập nhật giao diện:
+```jsx
+// Ví dụ từ ProductCard component
+export default function ProductCard({ image, title, rating, price, oldPrice, badges }) {
+  return (
+    <div className="group rounded-lg border border-gray-200 p-3">
+      <div className="relative aspect-[1/1] w-full overflow-hidden rounded-md bg-gray-50">
+        <img src={image} alt={title} className="absolute inset-0 size-full object-cover" />
+      </div>
+      <div className="mt-3 text-sm font-medium text-gray-900">{title}</div>
+    </div>
+  );
+}
+```
+
+**JSX Syntax**:
+JSX cho phép viết HTML-like syntax trong JavaScript, làm cho code dễ đọc và maintain hơn.
+
+**Hooks System**:
+React Hooks được sử dụng để quản lý state và lifecycle:
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const [products, setProducts] = useState([]);
+const [loading, setLoading] = useState(true);
+```
+
+### 2.2.3. React Router DOM
+
+React Router DOM (v7.9.3) được sử dụng để quản lý routing trong SPA:
+
+```jsx
+// main.jsx
+const router = createBrowserRouter([
+  { path: '/', element: <HomePage /> },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
+  { path: '/admin', element: <AdminHomePage /> },
+]);
+```
+
+**Tính năng của React Router**:
+- **Declarative routing**: Định nghĩa routes một cách khai báo
+- **Nested routing**: Hỗ trợ routes lồng nhau
+- **Code splitting**: Lazy loading các components
+- **History management**: Quản lý browser history
+
+## 2.3. Vite Build Tool
+
+### 2.3.1. Giới thiệu Vite
+
+Vite là một build tool hiện đại được phát triển bởi Evan You (tác giả Vue.js). Mini Store sử dụng Vite 7.1.12 với Rolldown engine để thay thế cho Webpack truyền thống.
+
+### 2.3.2. Ưu điểm của Vite
+
+**Fast Development Server**:
+- **Hot Module Replacement (HMR)**: Cập nhật tức thì khi thay đổi code
+- **ES Modules**: Sử dụng native ES modules của browser
+- **Pre-bundling**: Pre-bundle dependencies để tăng tốc độ
+
+**Optimized Production Build**:
+- **Rollup-based**: Sử dụng Rollup để bundle production
+- **Tree-shaking**: Loại bỏ dead code tự động
+- **Code splitting**: Tách code thành nhiều chunks
+
+**Configuration**:
+```javascript
+// vite.config.js
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+```
+
+### 2.3.3. Rolldown Engine
+
+Rolldown là JavaScript bundler được viết bằng Rust, mang lại hiệu suất vượt trội:
+- **10x faster**: Nhanh hơn Webpack đáng kể
+- **Rust-powered**: Tận dụng hiệu suất của Rust
+- **Rollup compatible**: Tương thích với Rollup plugins
+
+## 2.4. TailwindCSS Framework
+
+### 2.4.1. Utility-First CSS Framework
+
+TailwindCSS 4.1.13 là một utility-first CSS framework, khác biệt hoàn toàn với approach truyền thống:
+
+**Traditional CSS**:
+```css
+.product-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background-color: white;
+}
+```
+
+**TailwindCSS Approach**:
+```jsx
+<div className="rounded-lg border border-gray-200 p-3 bg-white">
+  {/* Content */}
+</div>
+```
+
+### 2.4.2. Responsive Design System
+
+TailwindCSS cung cấp hệ thống responsive design với breakpoints:
+
+```jsx
+// CategoryList.jsx
+<div className="grid grid-cols-3 gap-4 sm:grid-cols-5 lg:grid-cols-9">
+  {categories.map((category) => (
+    <CategoryItem key={category.name} {...category} />
+  ))}
+</div>
+```
+
+**Breakpoints**:
+- `sm`: 640px (Tablet)
+- `md`: 768px (Desktop nhỏ)
+- `lg`: 1024px (Desktop lớn)
+- `xl`: 1280px (Desktop rất lớn)
+
+### 2.4.3. Customization và Configuration
+
+```javascript
+// tailwind.config.js
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#634c9f', // Purple theme
+      }
+    },
+  },
+  plugins: [],
+}
+```
+
+### 2.4.4. PostCSS Integration
+
+TailwindCSS được tích hợp với PostCSS để xử lý CSS:
+
+```javascript
+// postcss.config.js
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
+    autoprefixer: {},
+  },
+};
+```
+
+## 2.5. UI Component Libraries
+
+### 2.5.1. Lucide React Icons
+
+Lucide React (v0.544.0) cung cấp hệ thống icons nhất quán:
+
+```jsx
+// HeaderAdmin.jsx
+import { Search, Bell, ShoppingCart, Plus } from 'lucide-react';
+
+<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+<Bell className="w-6 h-6 text-gray-600" />
+<ShoppingCart className="w-6 h-6 text-gray-600" />
+<Plus className="w-5 h-5 mr-2" />
+```
+
+**Ưu điểm của Lucide React**:
+- **Tree-shakable**: Chỉ bundle icons được sử dụng
+- **Consistent design**: Thiết kế thống nhất, minimalist
+- **Customizable**: Dễ dàng thay đổi size, color, stroke
+- **TypeScript support**: Hỗ trợ TypeScript đầy đủ
+
+### 2.5.2. Recharts Data Visualization
+
+Recharts (v3.2.1) được sử dụng cho SalesChart component:
+
+```jsx
+// SalesChart.jsx (dự kiến implementation)
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const data = [
+  { name: 'Jan', sales: 4000 },
+  { name: 'Feb', sales: 3000 },
+  { name: 'Mar', sales: 5000 },
+];
+
+<ResponsiveContainer width="100%" height={300}>
+  <LineChart data={data}>
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="name" />
+    <YAxis />
+    <Tooltip />
+    <Line type="monotone" dataKey="sales" stroke="#634c9f" />
+  </LineChart>
+</ResponsiveContainer>
+```
+
+## 2.6. Development Tools và Code Quality
+
+### 2.6.1. ESLint Configuration
+
+ESLint được cấu hình để đảm bảo code quality và consistency:
+
+```javascript
+// eslint.config.js
+export default defineConfig([
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs['recommended-latest'],
+      reactRefresh.configs.vite,
+    ],
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+```
+
+**ESLint Rules**:
+- **React Hooks Rules**: Đảm bảo hooks được sử dụng đúng cách
+- **React Refresh**: Hỗ trợ hot reload
+- **No unused vars**: Cảnh báo về biến không sử dụng
+
+### 2.6.2. Package Management với npm
+
+Mini Store sử dụng npm để quản lý dependencies:
+
+```json
+{
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.3",
+    "lucide-react": "^0.544.0",
+    "recharts": "^3.2.1"
+  },
+  "devDependencies": {
+    "vite": "npm:rolldown-vite@7.1.12",
+    "tailwindcss": "^4.1.13",
+    "eslint": "^9.36.0"
+  }
+}
+```
+
+### 2.6.3. Git Version Control
+
+Project sử dụng Git với GitHub để quản lý source code:
+- **Repository**: mini-store
+- **Owner**: PhatNguyenTT2
+- **Branch strategy**: main branch cho production
+- **Gitignore**: Loại trừ node_modules, dist, các file build
+
+## 2.7. Workflow và Architecture Patterns
+
+### 2.7.1. Development Principles
+
+Theo `development-principles.md`, project tuân thủ:
+
+**Component-Based Workflow**:
+1. **Analyze Design**: Phân tích Figma design thành các UI blocks
+2. **Create Child Components**: Tạo components con trong thư mục tương ứng
+3. **Assemble Page**: Kết hợp components để tạo page
+4. **Add Routing**: Cập nhật router configuration
+
+**Design Fidelity**:
+- Tuân thủ nghiêm ngặt Figma designs
+- Không tự ý thay đổi design
+- Đảm bảo consistent user experience
+
+### 2.7.2. Folder Structure Pattern
+
+```
+src/
+├── components/          # Reusable components
+│   ├── HomePage/       # Page-specific components
+│   ├── Layout/         # Layout wrappers
+│   ├── Header/         # Navigation components
+│   └── Footer/         # Footer components
+├── pages/              # Page components
+├── admin-pages/        # Admin interface
+├── assets/             # Static assets
+└── main.jsx           # Application entry point
+```
+
+### 2.7.3. Styling Architecture
+
+**Utility-First Approach**:
+- Sử dụng TailwindCSS utilities trực tiếp trong JSX
+- Tránh tạo custom CSS classes không cần thiết
+- Responsive design với mobile-first approach
+
+**Color System**:
+- Primary: `#634c9f` (Purple)
+- Gray scale: `gray-50` to `gray-900`
+- Semantic colors: `red-600` (danger), `green-600` (success)
+
+## 2.8. Performance Optimization Techniques
+
+### 2.8.1. Image Optimization
+
+**Lazy Loading**:
+```jsx
+<img 
+  src={image} 
+  alt={title} 
+  loading="lazy"
+  className="absolute inset-0 size-full object-cover" 
+/>
+```
+
+**Responsive Images**:
+- Sử dụng aspect-ratio utilities
+- Optimize images từ Figma CDN
+- WebP format support
+
+### 2.8.2. Code Splitting
+
+**Dynamic Imports**:
+```jsx
+// Dự kiến implementation
+const AdminPage = React.lazy(() => import('./admin-pages/HomePage'));
+
+<Suspense fallback={<div>Loading...</div>}>
+  <AdminPage />
+</Suspense>
+```
+
+**Route-based Splitting**:
+- Mỗi page được tách thành separate chunks
+- Lazy loading các admin components
+- Giảm initial bundle size
+
+### 2.8.3. Build Optimization
+
+**Vite Optimizations**:
+- **Tree shaking**: Loại bỏ unused code
+- **Minification**: Compress JavaScript và CSS
+- **Asset optimization**: Optimize images và fonts
+- **Caching**: Browser caching với content hashing
+
+## Kết luận Chương 2
+
+Chương 2 đã trình bày đầy đủ cơ sở lý thuyết và công nghệ được sử dụng trong dự án Mini Store. Việc lựa chọn React, Vite, TailwindCSS và các công cụ hỗ trợ tạo nên một tech stack hiện đại, hiệu suất cao và dễ bảo trì. 
+
+Kiến trúc component-based kết hợp với utility-first CSS framework giúp đảm bảo code quality, reusability và scalability. Các công cụ development như ESLint, Git và workflow principles được thiết lập để hỗ trợ team development và maintain code consistency.
+
+Tech stack này không chỉ đáp ứng yêu cầu hiện tại mà còn đảm bảo khả năng mở rộng và tích hợp các tính năng mới trong tương lai.
