@@ -17,3 +17,7 @@ To maintain a clean, scalable, and maintainable codebase, we follow a principle 
 4.  **Add Routing**: Update the main router (in `src/main.jsx`) to include a path for the new page.
 
 By following this principle, we ensure that our components are decoupled and our pages are simple, declarative assemblies of those components.
+
+## Design Fidelity
+
+It is crucial to adhere strictly to the provided Figma designs. Developers should not introduce their own design variations. The goal is to ensure a consistent and predictable user experience by implementing the designs exactly as specified.
