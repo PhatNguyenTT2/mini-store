@@ -1,12 +1,12 @@
 import React from 'react';
-import LayoutAdmin from '../components/Layout/LayoutAdmin';
-import SalesChart from '../components/HomePageAdmin/SalesChart';
+import { Layout } from '../components/Layout';
+import { SalesChart } from '../components/SalesChart';
 
 const AdminHomePage = () => {
   return (
-    <LayoutAdmin>
+    <Layout>
       <SalesChart />
-    </LayoutAdmin>
+    </Layout>
   );
 };
 

@@ -1,17 +1,12 @@
 import React from 'react';
-import TopBar from '../Header/TopBar';
-import Header from '../Header/Header';
-import Footer from '../Footer/Footer';
+import { SidebarSection } from './sections/SidebarSection';
+import { MainContentSection } from './sections/MainContentSection';
 
-const Layout = ({ children }) => {
+export const Layout = ({ children }) => {
   return (
-    <div className="flex min-h-screen flex-col">
-      <TopBar />
-      <Header />
-      <main className="flex-grow">{children}</main>
-      <Footer />
+    <div className="flex h-screen bg-gray-100">
+      <SidebarSection />
+      <MainContentSection>{children}</MainContentSection>
     </div>
   );
 };
-
-export default Layout;

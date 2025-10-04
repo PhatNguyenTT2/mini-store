@@ -1,6 +1,6 @@
 import React from 'react';
 
-const SidebarHeader = () => {
+export const LogoSection = () => {
   const logoUrl = "https://c.animaapp.com/YP0auJCm/img/nest@2x.png";
 
   return (
@@ -9,5 +9,3 @@ const SidebarHeader = () => {
     </div>
   );
 };
-
-export default SidebarHeader;
