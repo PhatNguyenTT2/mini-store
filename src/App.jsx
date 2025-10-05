@@ -1,7 +1,16 @@
-import React from 'react';
-import './App.css';
-import HomePage from './admin-pages/HomePage.jsx';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Home, ViewProduct } from "./pages";
+import "./App.css";
 
-export default function App() {
-  return <HomePage />;
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/product/view" element={<ViewProduct />} />
+      </Routes>
+    </Router>
+  );
 }
+
+export default App;
