@@ -65,8 +65,9 @@ function checkFile(filePath) {
       const matches = line.match(pattern);
       if (matches) {
         matches.forEach(match => {
-          // Skip if it's a comment about conversion
-          if (line.includes('WRONG') || line.includes('Figma') || line.includes('TODO')) {
+          // Skip if it's a comment about conversion or product colors
+          if (line.includes('WRONG') || line.includes('Figma') || line.includes('TODO') ||
+            line.includes('Product color') || line.includes('product color')) {
             return;
           }
 
@@ -82,8 +83,9 @@ function checkFile(filePath) {
     // Check for purple hex colors
     PURPLE_HEX_COLORS.forEach(hex => {
       if (line.toLowerCase().includes(hex.toLowerCase())) {
-        // Skip if it's a comment about conversion
-        if (line.includes('WRONG') || line.includes('Figma') || line.includes('TODO')) {
+        // Skip if it's a comment about conversion or product colors
+        if (line.includes('WRONG') || line.includes('Figma') || line.includes('TODO') ||
+          line.includes('Product color') || line.includes('product color')) {
           return;
         }
 

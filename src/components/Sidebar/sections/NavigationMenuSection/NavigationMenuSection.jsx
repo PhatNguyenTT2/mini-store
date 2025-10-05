@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ChevronDown,
@@ -21,8 +21,17 @@ import {
 } from 'lucide-react';
 
 export const NavigationMenuSection = () => {
-  const [openDropdowns, setOpenDropdowns] = useState({});
+  // Lấy trạng thái từ localStorage khi component mount
+  const [openDropdowns, setOpenDropdowns] = useState(() => {
+    const savedState = localStorage.getItem('sidebarDropdownState');
+    return savedState ? JSON.parse(savedState) : {};
+  });
   const location = useLocation();
+
+  // Lưu trạng thái vào localStorage mỗi khi thay đổi
+  useEffect(() => {
+    localStorage.setItem('sidebarDropdownState', JSON.stringify(openDropdowns));
+  }, [openDropdowns]);
 
   const toggleDropdown = (itemName) => {
     setOpenDropdowns(prev => ({
@@ -42,8 +51,8 @@ export const NavigationMenuSection = () => {
           icon: Package2,
           arrow: true,
           submenu: [
-            { name: 'View', href: '/product/view' },
-            { name: 'Product Detail', href: '/products/detail' },
+            { name: 'View', href: '/products/view' },
+            // { name: 'Product Detail', href: '/products/detail' },
             { name: 'Shopping Cart', href: '/products/cart' },
             { name: 'Checkout', href: '/products/checkout' },
           ]
@@ -93,8 +102,8 @@ export const NavigationMenuSection = () => {
                       <div
                         onClick={() => toggleDropdown(item.name)}
                         className={`flex items-center justify-between py-2 px-4 rounded-full text-sm cursor-pointer ${hasActiveSubmenu
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : 'text-gray-700 hover:bg-emerald-50'
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : 'text-gray-700 hover:bg-emerald-50'
                           }`}
                       >
                         <div className="flex items-center">
@@ -123,8 +132,8 @@ export const NavigationMenuSection = () => {
                       <Link
                         to={item.href}
                         className={`flex items-center justify-between py-2 px-4 rounded-full text-sm ${isActive
-                            ? 'bg-emerald-500 text-white'
-                            : 'text-gray-700 hover:bg-emerald-50'
+                          ? 'bg-emerald-500 text-white'
+                          : 'text-gray-700 hover:bg-emerald-50'
                           }`}
                       >
                         <div className="flex items-center">
@@ -160,8 +169,8 @@ export const NavigationMenuSection = () => {
                               <Link
                                 to={subitem.href}
                                 className={`block py-2 px-4 text-sm rounded-lg transition-colors ${isSubmenuActive
-                                    ? 'text-emerald-600 bg-emerald-50 font-medium'
-                                    : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
+                                  ? 'text-emerald-600 bg-emerald-50 font-medium'
+                                  : 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50'
                                   }`}
                               >
                                 {subitem.name}

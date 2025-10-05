@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Home, ViewProduct } from "./pages";
+import { Home, ViewProduct, Checkout, DetailProduct, ShoppingCart } from "./pages";
 import "./App.css";
 
 function App() {
@@ -7,7 +7,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/product/view" element={<ViewProduct />} />
+        <Route path="/products/view" element={<ViewProduct />} />
+        <Route path="/products/:id/:slug" element={<DetailProduct />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/shopping-cart" element={<ShoppingCart />} />
       </Routes>
     </Router>
   );
