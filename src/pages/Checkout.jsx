@@ -5,8 +5,8 @@ import { Breadcrumb } from '../components/Breadcrumb';
 const Checkout = () => {
   // Breadcrumb items
   const breadcrumbItems = [
-    { label: 'Dashboard', href: '/' },
-    { label: 'Checkout', href: '/products/checkout' },
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Checkout', href: null },
   ];
 
   return (

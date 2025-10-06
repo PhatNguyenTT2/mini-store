@@ -5,8 +5,8 @@ import { Breadcrumb } from '../components/Breadcrumb';
 const ShoppingCart = () => {
   // Breadcrumb items
   const breadcrumbItems = [
-    { label: 'Dashboard', href: '/' },
-    { label: 'Shopping Cart', href: '/products/cart' },
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Shopping Cart', href: null },
   ];
 
   return (

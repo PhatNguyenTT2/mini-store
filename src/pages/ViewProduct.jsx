@@ -7,7 +7,7 @@ import { ProductList } from '../components/ProductList';
 const ViewProduct = () => {
   // Breadcrumb items
   const breadcrumbItems = [
-    { label: 'Dashboard', href: '/' },
+    { label: 'Dashboard', href: '/dashboard' },
     { label: 'Product List', href: '/products/view' },
   ];
 

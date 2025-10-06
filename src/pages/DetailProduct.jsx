@@ -11,9 +11,9 @@ const DetailProduct = () => {
 
   // Breadcrumb items
   const breadcrumbItems = [
-    { label: 'Dashboard', href: '/' },
+    { label: 'Dashboard', href: '/dashboard' },
     { label: 'Product List', href: '/products/view' },
-    { label: 'Product Detail', href: '/products/detail' },
+    { label: 'Product Detail', href: null },
   ];
 
   return (
