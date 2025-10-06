@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Home, ViewProduct, Checkout, DetailProduct, ShoppingCart, LoginSignup } from "./pages";
+import { Dashboard, ViewProduct, Checkout, DetailProduct, ShoppingCart, LoginSignup, Orders } from "./pages";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -16,7 +16,7 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Home />
+              <Dashboard />
             </ProtectedRoute>
           }
         />
@@ -37,7 +37,7 @@ function App() {
           }
         />
         <Route
-          path="/product/checkout"
+          path="/products/checkout"
           element={
             <ProtectedRoute>
               <Checkout />
@@ -45,10 +45,18 @@ function App() {
           }
         />
         <Route
-          path="/product/shopping-cart"
+          path="/products/shopping-cart"
           element={
             <ProtectedRoute>
               <ShoppingCart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <Orders />
             </ProtectedRoute>
           }
         />

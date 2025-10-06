@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Layout } from '../components/Layout';
-import { Breadcrumb } from '../components/Breadcrumb';
-import { FilterProduct } from '../components/FilterProduct';
-import { ProductList } from '../components/ProductList';
+import { Layout } from '../../components/Layout';
+import { Breadcrumb } from '../../components/Breadcrumb';
+import { FilterProduct } from '../../components/FilterProduct';
+import { ProductList } from '../../components/ProductList';
 
 const ViewProduct = () => {
   // Breadcrumb items

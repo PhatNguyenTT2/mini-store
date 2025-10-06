@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { href, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   ChevronRight,
@@ -59,31 +59,30 @@ export const NavigationMenuSection = () => {
       category: 'E-Commerce',
       items: [
         { name: 'Dashboard', icon: LayoutGrid, href: '/dashboard' },
-        { name: 'Orders', icon: ShoppingBag, arrow: true },
+        { name: 'Orders', icon: ShoppingBag, arrow: false, href: '/orders' },
         {
           name: 'Products',
           icon: Package2,
           arrow: true,
           submenu: [
             { name: 'View', href: '/products/view' },
-            // { name: 'Product Detail', href: '/dashboard/products/detail' },
-            { name: 'Shopping Cart', href: '/product/shopping-cart' },
-            { name: 'Checkout', href: '/product/checkout' },
+            { name: 'Shopping Cart', href: '/products/shopping-cart' },
+            { name: 'Checkout', href: '/products/checkout' },
           ]
         },
         { name: 'Buyer', icon: User2Icon, arrow: true },
         { name: 'Customers', icon: User },
-        { name: 'Invoices', icon: ClipboardList, arrow: true },
+        // { name: 'Invoices', icon: ClipboardList, arrow: true },
       ],
     },
-    {
-      category: 'Apps',
-      items: [
-        { name: 'Chats', icon: MessageSquare, badge: 2 },
-        { name: 'Email', icon: Mail, arrow: true },
-        { name: 'Todo App', icon: CheckSquare, arrow: true },
-      ],
-    },
+    // {
+    //   category: 'Apps',
+    //   items: [
+    //     { name: 'Chats', icon: MessageSquare, badge: 2 },
+    //     { name: 'Email', icon: Mail, arrow: true },
+    //     { name: 'Todo App', icon: CheckSquare, arrow: true },
+    //   ],
+    // },
     {
       category: 'Pages',
       items: [

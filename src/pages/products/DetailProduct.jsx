@@ -1,8 +1,8 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Layout } from '../components/Layout';
-import { Breadcrumb } from '../components/Breadcrumb';
-import { ProductInfo, ProductDetail } from '../components/ProductDetail';
+import { Layout } from '../../components/Layout';
+import { Breadcrumb } from '../../components/Breadcrumb';
+import { ProductInfo, ProductDetail } from '../../components/ProductDetail';
 
 const DetailProduct = () => {
   const params = useParams();
