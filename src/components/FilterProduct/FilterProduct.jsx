@@ -1,27 +1,73 @@
-import React, { useState } from 'react';
-import { Filter } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Filter, X } from 'lucide-react';
+import categoryService from '../../services/categoryService';
 
-export const FilterProduct = () => {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [priceRange, setPriceRange] = useState([500, 1000]);
-  const [selectedColors, setSelectedColors] = useState([]);
-  const [selectedConditions, setSelectedConditions] = useState([]);
+export const FilterProduct = ({ onFilterChange, currentFilters = {} }) => {
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState(currentFilters.categories || []);
+  const [priceRange, setPriceRange] = useState([
+    currentFilters.minPrice || 0,
+    currentFilters.maxPrice || 200
+  ]);
   const [isDragging, setIsDragging] = useState(null); // null | 'min' | 'max'
 
-  const handleCategoryClick = (categoryName) => {
-    setSelectedCategory(selectedCategory === categoryName ? null : categoryName);
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryService.getCategories();
+        if (result.success) {
+          setCategories(result.data.categories);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleCategoryClick = (categoryId) => {
+    if (categoryId === null) {
+      // Click "All Products" - clear all categories
+      setSelectedCategories([]);
+    } else {
+      // Toggle category selection
+      setSelectedCategories(prev => {
+        if (prev.includes(categoryId)) {
+          return prev.filter(id => id !== categoryId);
+        } else {
+          return [...prev, categoryId];
+        }
+      });
+    }
   };
 
-  const handleColorToggle = (color) => {
-    setSelectedColors(prev =>
-      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
-    );
+  // Apply filters
+  const handleApplyFilters = () => {
+    if (onFilterChange) {
+      onFilterChange({
+        categories: selectedCategories,
+        minPrice: priceRange[0] === 0 ? null : priceRange[0],
+        maxPrice: priceRange[1] === 200 ? null : priceRange[1]
+      });
+    }
   };
 
-  const handleConditionToggle = (condition) => {
-    setSelectedConditions(prev =>
-      prev.includes(condition) ? prev.filter(c => c !== condition) : [...prev, condition]
-    );
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSelectedCategories([]);
+    setPriceRange([0, 200]);
+    if (onFilterChange) {
+      onFilterChange({
+        categories: [],
+        minPrice: null,
+        maxPrice: null
+      });
+    }
   };
 
   const handleMouseDown = (type) => {
@@ -43,13 +89,13 @@ export const FilterProduct = () => {
       const rect = slider.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      const value = Math.round((percentage / 100) * 1000);
+      const value = Math.round((percentage / 100) * 200);
 
       setPriceRange(prev => {
         if (isDragging === 'min') {
-          return [Math.min(value, prev[1] - 50), prev[1]];
+          return [Math.min(value, prev[1] - 10), prev[1]];
         } else {
-          return [prev[0], Math.max(value, prev[0] + 50)];
+          return [prev[0], Math.max(value, prev[0] + 10)];
         }
       });
     };
@@ -69,36 +115,26 @@ export const FilterProduct = () => {
     }
   }, [isDragging]);
 
-  const CATEGORY_IMAGES = {
-    bakingMaterial: "https://www.figma.com/api/mcp/asset/99a37d83-0cb8-40cb-9da2-c9a1c9eb8662",
-    milksDairies: "https://www.figma.com/api/mcp/asset/0359b432-c20d-4378-a587-d6f7e25eeda0",
-    petFoodsToy: "https://www.figma.com/api/mcp/asset/78e9d36f-270d-4610-ac4f-2aeeb715d223",
-    clothingBeauty: "https://www.figma.com/api/mcp/asset/54310325-abd2-4f17-9865-e5ae10f85217",
-    freshFruit: "https://www.figma.com/api/mcp/asset/df9e24f5-fc45-431e-a6d1-e9ff64942cb3",
-  };
-
-  const categories = [
-    { name: 'Milks & Dairies', count: 5, icon: CATEGORY_IMAGES.milksDairies },
-    { name: 'Clothing & Beauty', count: 4, icon: CATEGORY_IMAGES.clothingBeauty },
-    { name: 'Pet Foods & Toy', count: 2, icon: CATEGORY_IMAGES.petFoodsToy },
-    { name: 'Baking material', count: 11, icon: CATEGORY_IMAGES.bakingMaterial },
-    { name: 'Fresh Fruit', count: 10, icon: CATEGORY_IMAGES.freshFruit },
-  ];
-
-  const colors = [
-    { name: 'Red', count: 56 },
-    { name: 'Green', count: 78 },
-    { name: 'Blue', count: 54 },
-  ];
-
-  const conditions = [
-    { name: 'New', count: 1506 },
-    { name: 'Refurbished', count: 27 },
-    { name: 'Used', count: 45 },
-  ];
+  // Check if any filters are active
+  const hasActiveFilters = selectedCategories.length > 0 ||
+    priceRange[0] !== 0 ||
+    priceRange[1] !== 200;
 
   return (
     <div className="w-72 space-y-4 overflow-y-auto h-full">
+      {/* Filter Header with Clear Button */}
+      {hasActiveFilters && (
+        <div className="bg-white border border-gray-200 rounded-xl p-3">
+          <button
+            onClick={handleClearFilters}
+            className="w-full flex items-center justify-center gap-2 text-red-600 hover:text-red-700 transition-colors"
+          >
+            <X className="w-4 h-4" />
+            <span className="text-sm font-semibold">Clear All Filters</span>
+          </button>
+        </div>
+      )}
+
       {/* Category Section */}
       <div className="bg-white border border-gray-200 rounded-xl p-4">
         {/* Header */}
@@ -107,43 +143,78 @@ export const FilterProduct = () => {
           <div className="w-16 h-0.5 bg-emerald-400 mt-1.5"></div>
         </div>
 
-        {/* Category List */}
-        <div className="space-y-2">
-          {categories.map((category) => (
+        {/* Loading State */}
+        {loadingCategories ? (
+          <div className="text-center py-4">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
+            <p className="text-xs text-gray-500 mt-2">Loading categories...</p>
+          </div>
+        ) : (
+          <>
+            {/* "All" Option */}
             <button
-              key={category.name}
-              onClick={() => handleCategoryClick(category.name)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded border transition-all ${selectedCategory === category.name
+              onClick={() => handleCategoryClick(null)}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded border transition-all mb-2 ${selectedCategories.length === 0
                 ? 'border-emerald-500 bg-emerald-50'
                 : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'
                 }`}
             >
               <div className="flex items-center gap-2">
-                <img
-                  src={category.icon}
-                  alt={category.name}
-                  className="w-8 h-8 object-contain"
-                />
-                <span className="text-xs text-gray-800">{category.name}</span>
-              </div>
-              <div className="bg-emerald-200 rounded-full w-5 h-5 flex items-center justify-center">
-                <span className="text-[10px] text-gray-800 font-medium">{category.count}</span>
+                <div className="w-8 h-8 flex items-center justify-center bg-emerald-100 rounded">
+                  <Filter className="w-4 h-4 text-emerald-600" />
+                </div>
+                <span className="text-xs text-gray-800 font-semibold">All Products</span>
               </div>
             </button>
-          ))}
-        </div>
+
+            {/* Category List from API - Multiple Selection */}
+            <div className="space-y-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded border transition-all ${selectedCategories.includes(category.id)
+                    ? 'border-emerald-500 bg-emerald-50'
+                    : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'
+                    }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {category.image ? (
+                      <img
+                        src={category.image}
+                        alt={category.name}
+                        className="w-8 h-8 object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded">
+                        <span className="text-xs">📦</span>
+                      </div>
+                    )}
+                    <span className="text-xs text-gray-800">{category.name}</span>
+                  </div>
+                  <div className="bg-emerald-200 rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">
+                    <span className="text-[10px] text-gray-800 font-medium">{category.productCount || 0}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Fill by Price Section */}
+      {/* Filter by Price Section */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 relative overflow-hidden">
         {/* Decorative image in bottom right */}
         <div className="absolute bottom-0 right-0 w-16 h-16 opacity-10 pointer-events-none">
-          <div className="text-4xl">🥬</div>
+          <div className="text-4xl">💰</div>
         </div>
 
         {/* Header */}
         <div className="border-b border-gray-200 pb-2 mb-4 relative z-10">
-          <h3 className="text-lg font-bold text-gray-800">Fill by price</h3>
+          <h3 className="text-lg font-bold text-gray-800">Filter by Price</h3>
           <div className="w-16 h-0.5 bg-emerald-400 mt-1.5"></div>
         </div>
 
@@ -166,16 +237,16 @@ export const FilterProduct = () => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const percentage = (x / rect.width) * 100;
-                const clickValue = Math.round((percentage / 100) * 1000);
+                const clickValue = Math.round((percentage / 100) * 200);
 
                 const distToMin = Math.abs(clickValue - priceRange[0]);
                 const distToMax = Math.abs(clickValue - priceRange[1]);
 
                 if (distToMin < distToMax) {
-                  setPriceRange([Math.min(clickValue, priceRange[1] - 50), priceRange[1]]);
+                  setPriceRange([Math.min(clickValue, priceRange[1] - 10), priceRange[1]]);
                   handleMouseDown('min');
                 } else {
-                  setPriceRange([priceRange[0], Math.max(clickValue, priceRange[0] + 50)]);
+                  setPriceRange([priceRange[0], Math.max(clickValue, priceRange[0] + 10)]);
                   handleMouseDown('max');
                 }
               }}
@@ -184,15 +255,15 @@ export const FilterProduct = () => {
               <div
                 className="absolute h-1 bg-emerald-500 rounded"
                 style={{
-                  left: `${(priceRange[0] / 1000) * 100}%`,
-                  right: `${100 - (priceRange[1] / 1000) * 100}%`
+                  left: `${(priceRange[0] / 200) * 100}%`,
+                  right: `${100 - (priceRange[1] / 200) * 100}%`
                 }}
               />
 
               {/* Min thumb */}
               <div
                 className="absolute w-4 h-4 bg-emerald-500 rounded-full -top-1.5 transform -translate-x-1/2 cursor-grab active:cursor-grabbing z-10"
-                style={{ left: `${(priceRange[0] / 1000) * 100}%` }}
+                style={{ left: `${(priceRange[0] / 200) * 100}%` }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   handleMouseDown('min');
@@ -202,7 +273,7 @@ export const FilterProduct = () => {
               {/* Max thumb */}
               <div
                 className="absolute w-4 h-4 bg-emerald-500 rounded-full -top-1.5 transform -translate-x-1/2 cursor-grab active:cursor-grabbing z-10"
-                style={{ left: `${(priceRange[1] / 1000) * 100}%` }}
+                style={{ left: `${(priceRange[1] / 200) * 100}%` }}
                 onMouseDown={(e) => {
                   e.stopPropagation();
                   handleMouseDown('max');
@@ -212,58 +283,65 @@ export const FilterProduct = () => {
           </div>
         </div>
 
-        {/* Color Checkboxes */}
-        <div className="mb-4 relative z-10">
-          <h4 className="text-xs font-black text-gray-500 mb-2">Color</h4>
-          <div className="space-y-1.5">
-            {colors.map((color) => (
-              <label
-                key={color.name}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedColors.includes(color.name)}
-                  onChange={() => handleColorToggle(color.name)}
-                  className="w-3.5 h-3.5 rounded border-2 border-gray-400 text-emerald-600 focus:ring-emerald-500"
-                />
-                <span className="text-xs text-gray-600">
-                  {color.name} ({color.count})
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
+        {/* Filter Actions */}
+        <div className="flex gap-2 relative z-10">
+          <button
+            onClick={handleApplyFilters}
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+          >
+            <Filter className="w-4 h-4" />
+            <span className="text-xs tracking-wider">APPLY FILTER</span>
+          </button>
 
-        {/* Item Condition Checkboxes */}
-        <div className="mb-4 relative z-10">
-          <h4 className="text-xs font-black text-gray-500 mb-2">Item Condition</h4>
-          <div className="space-y-1.5">
-            {conditions.map((condition) => (
-              <label
-                key={condition.name}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedConditions.includes(condition.name)}
-                  onChange={() => handleConditionToggle(condition.name)}
-                  className="w-3.5 h-3.5 rounded border-2 border-gray-400 text-emerald-600 focus:ring-emerald-500"
-                />
-                <span className="text-xs text-gray-600">
-                  {condition.name} ({condition.count})
-                </span>
-              </label>
-            ))}
-          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={handleClearFilters}
+              className="px-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+              title="Clear filters"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
-
-        {/* Filter Button */}
-        <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-2 transition-colors relative z-10">
-          <Filter className="w-3 h-3" />
-          <span className="text-[10px] tracking-wider">FILTER</span>
-        </button>
       </div>
+
+      {/* Active Filters Display */}
+      {hasActiveFilters && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <h4 className="text-sm font-bold text-gray-800 mb-3">Active Filters ({selectedCategories.length + (priceRange[0] !== 0 || priceRange[1] !== 200 ? 1 : 0)})</h4>
+          <div className="space-y-2">
+            {selectedCategories.map(catId => {
+              const cat = categories.find(c => c.id === catId);
+              return cat ? (
+                <div key={catId} className="flex items-center justify-between bg-emerald-50 px-3 py-1.5 rounded">
+                  <span className="text-xs text-emerald-700">
+                    {cat.name}
+                  </span>
+                  <button
+                    onClick={() => handleCategoryClick(catId)}
+                    className="text-emerald-700 hover:text-emerald-900"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : null;
+            })}
+            {(priceRange[0] !== 0 || priceRange[1] !== 200) && (
+              <div className="flex items-center justify-between bg-emerald-50 px-3 py-1.5 rounded">
+                <span className="text-xs text-emerald-700">
+                  ${priceRange[0]} - ${priceRange[1]}
+                </span>
+                <button
+                  onClick={() => setPriceRange([0, 200])}
+                  className="text-emerald-700 hover:text-emerald-900"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

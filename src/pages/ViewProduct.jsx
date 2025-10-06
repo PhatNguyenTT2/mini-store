@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { FilterProduct } from '../components/FilterProduct';
@@ -11,6 +11,24 @@ const ViewProduct = () => {
     { label: 'Product List', href: '/products/view' },
   ];
 
+  // Filter state - shared between FilterProduct and ProductList
+  const [filters, setFilters] = useState({
+    categories: [],
+    minPrice: null,
+    maxPrice: null,
+    sortBy: 'newest'
+  });
+
+  // Handle filter changes from FilterProduct
+  const handleFilterChange = (newFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  // Handle sort change from ProductList
+  const handleSortChange = (sortBy) => {
+    setFilters(prev => ({ ...prev, sortBy }));
+  };
+
   return (
     <Layout>
       <div className="flex gap-6 h-full -m-6 p-6">
@@ -20,12 +38,18 @@ const ViewProduct = () => {
           <Breadcrumb items={breadcrumbItems} />
 
           {/* Product List with Grid */}
-          <ProductList />
+          <ProductList
+            filters={filters}
+            onSortChange={handleSortChange}
+          />
         </div>
 
         {/* Right Sidebar - Filter */}
         <div className="flex-shrink-0">
-          <FilterProduct />
+          <FilterProduct
+            onFilterChange={handleFilterChange}
+            currentFilters={filters}
+          />
         </div>
       </div>
     </Layout>

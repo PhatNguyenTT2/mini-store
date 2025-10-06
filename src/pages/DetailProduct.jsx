@@ -3,11 +3,15 @@ import { useParams } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { ProductInfo, ProductDetail } from '../components/ProductDetail';
-import { getProductIdFromParams } from '../utils/productRouting';
 
 const DetailProduct = () => {
   const params = useParams();
-  const productId = params.id ? getProductIdFromParams(params) : null;
+  // MongoDB ObjectId is a string, not a number
+  const productId = params.id || null;
+
+  console.log('DetailProduct - URL params:', params);
+  console.log('DetailProduct - Product ID:', productId);
+  console.log('DetailProduct - Slug:', params.slug);
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -15,6 +19,27 @@ const DetailProduct = () => {
     { label: 'Product List', href: '/products/view' },
     { label: 'Product Detail', href: null },
   ];
+
+  // If no product ID, show error
+  if (!productId) {
+    return (
+      <Layout>
+        <div className="space-y-6">
+          <Breadcrumb items={breadcrumbItems} />
+          <div className="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
+            <h2 className="text-red-600 text-xl font-bold mb-2">Invalid Product URL</h2>
+            <p className="text-red-500 mb-4">Product ID is missing from the URL.</p>
+            <a
+              href="/products/view"
+              className="inline-block px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+            >
+              Back to Products
+            </a>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>

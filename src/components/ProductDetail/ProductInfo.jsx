@@ -1,17 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Share2 } from 'lucide-react';
-import { getProductById, getDiscountPercent } from '../../data/products';
+import productService from '../../services/productService';
 
 export const ProductInfo = ({ productId }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedWeight, setSelectedWeight] = useState('60g');
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Get product data by ID
-  const product = getProductById(productId);
+  // Fetch product from API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!productId) return;
 
-  // If product not found, show fallback
-  if (!product) {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await productService.getProductById(productId);
+        if (result.success) {
+          setProduct(result.data.product);
+        }
+      } catch (err) {
+        console.error('Failed to fetch product:', err);
+        setError('Unable to load product details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [productId]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="bg-white border border-[#ececec] rounded-[15px] p-8">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+            <p className="mt-4 text-gray-600">Loading product...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !product) {
     return (
       <div className="bg-white border border-[#ececec] rounded-[15px] p-8">
         <div className="text-center py-12">
@@ -19,24 +57,21 @@ export const ProductInfo = ({ productId }) => {
             Product not found
           </h2>
           <p className="text-[#7e7e7e] text-base font-['Lato',sans-serif] mt-2">
-            The requested product could not be found.
+            {error || 'The requested product could not be found.'}
           </p>
         </div>
       </div>
     );
   }
 
-  const discount = getDiscountPercent(product.price, product.originalPrice);
+  const discount = productService.getDiscountPercent(product.price, product.originalPrice);
 
-  // Product images
+  // Product images - use product.images array if available, otherwise use main image
   const productImages = {
     main: product.image,
-    thumbnails: [
-      "https://www.figma.com/api/mcp/asset/e6a50e89-6179-4d9b-b15a-b4ca00ad96db",
-      "https://www.figma.com/api/mcp/asset/ef04503f-e9ad-415b-a8fa-b4ea28a4e92c",
-      "https://www.figma.com/api/mcp/asset/729dad69-466f-4c95-9c51-de0eeeaab066",
-      "https://www.figma.com/api/mcp/asset/8d48905d-99c9-4197-b306-fbb71c665f53",
-    ]
+    thumbnails: product.images && product.images.length > 0
+      ? product.images
+      : [product.image, product.image, product.image, product.image]
   };
 
   const weights = ['50g', '60g', '80g', '100g', '150g'];
@@ -119,22 +154,24 @@ export const ProductInfo = ({ productId }) => {
               <div className="flex gap-1">
                 {[...Array(5)].map((_, index) => (
                   <svg key={index} width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M8 0L9.79611 5.52786H15.6085L10.9062 8.94427L12.7023 14.4721L8 11.0557L3.29772 14.4721L5.09383 8.94427L0.391548 5.52786H6.20389L8 0Z" fill={index < Math.floor(product.rating) ? "#FDC040" : "#E0E0E0"} />
+                    <path d="M8 0L9.79611 5.52786H15.6085L10.9062 8.94427L12.7023 14.4721L8 11.0557L3.29772 14.4721L5.09383 8.94427L0.391548 5.52786H6.20389L8 0Z" fill={index < Math.floor(product.rating || 0) ? "#FDC040" : "#E0E0E0"} />
                   </svg>
                 ))}
               </div>
-              <span className="text-[#adadad] text-sm font-['Lato',sans-serif]">({product.reviews} reviews)</span>
+              <span className="text-[#adadad] text-sm font-['Lato',sans-serif]">({product.reviewCount || 0} reviews)</span>
             </div>
           </div>
 
           {/* Price */}
           <div className="flex items-center gap-4">
             <span className="text-[#3bb77e] text-[40px] font-bold font-['Quicksand',sans-serif]">
-              ${product.price.toFixed(2)}
+              ${(product.price || 0).toFixed(2)}
             </span>
-            <span className="text-[#adadad] text-[24px] font-bold font-['Quicksand',sans-serif] line-through">
-              ${product.originalPrice.toFixed(2)}
-            </span>
+            {product.originalPrice && (
+              <span className="text-[#adadad] text-[24px] font-bold font-['Quicksand',sans-serif] line-through">
+                ${product.originalPrice.toFixed(2)}
+              </span>
+            )}
             {discount > 0 && (
               <span className="bg-[#ffeaea] text-[#f74b81] text-sm font-bold px-3 py-1 rounded">
                 {discount}% Off
@@ -215,35 +252,48 @@ export const ProductInfo = ({ productId }) => {
 
           {/* Product Meta */}
           <div className="space-y-2 pt-4 border-t border-[#ececec]">
-            <div className="flex items-center gap-2">
-              <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">Type:</span>
-              <span className="text-[#3bb77e] text-sm font-['Lato',sans-serif] font-semibold">{product.type}</span>
-            </div>
+            {product.type && (
+              <div className="flex items-center gap-2">
+                <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">Type:</span>
+                <span className="text-[#3bb77e] text-sm font-['Lato',sans-serif] font-semibold">{product.type}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">SKU:</span>
               <span className="text-[#253d4e] text-sm font-['Lato',sans-serif]">{product.sku}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">MFG:</span>
-              <span className="text-[#253d4e] text-sm font-['Lato',sans-serif]">{product.mfg}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">Tags:</span>
-              <div className="flex gap-2">
-                {product.tags.map((tag, index) => (
-                  <span key={index} className="text-[#7e7e7e] text-sm font-['Lato',sans-serif]">
-                    {tag}{index < product.tags.length - 1 ? ',' : ''}
-                  </span>
-                ))}
+            {product.mfgDate && (
+              <div className="flex items-center gap-2">
+                <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">MFG:</span>
+                <span className="text-[#253d4e] text-sm font-['Lato',sans-serif]">
+                  {new Date(product.mfgDate).toLocaleDateString()}
+                </span>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">LIFE:</span>
-              <span className="text-[#253d4e] text-sm font-['Lato',sans-serif]">{product.life}</span>
-            </div>
+            )}
+            {product.tags && product.tags.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">Tags:</span>
+                <div className="flex gap-2">
+                  {product.tags.map((tag, index) => (
+                    <span key={index} className="text-[#7e7e7e] text-sm font-['Lato',sans-serif]">
+                      {tag}{index < product.tags.length - 1 ? ',' : ''}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {product.shelfLife && (
+              <div className="flex items-center gap-2">
+                <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">LIFE:</span>
+                <span className="text-[#253d4e] text-sm font-['Lato',sans-serif]">{product.shelfLife}</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <span className="text-[#7e7e7e] text-sm font-['Lato',sans-serif] min-w-[80px]">Stock:</span>
-              <span className="text-[#3bb77e] text-sm font-['Lato',sans-serif] font-semibold">{product.stock} Items In Stock</span>
+              <span className={`text-sm font-['Lato',sans-serif] font-semibold ${product.stock > 0 ? 'text-[#3bb77e]' : 'text-red-600'
+                }`}>
+                {product.stock > 0 ? `${product.stock} Items In Stock` : 'Out of Stock'}
+              </span>
             </div>
           </div>
         </div>

@@ -13,14 +13,6 @@ function App() {
 
         {/* Dashboard Routes - Protected */}
         <Route
-          path="/home"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/dashboard"
           element={
             <ProtectedRoute>

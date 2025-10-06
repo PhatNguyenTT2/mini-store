@@ -16,7 +16,7 @@ export const generateSlug = (name) => {
 
 /**
  * Generate product detail URL
- * @param {number} id - Product ID
+ * @param {string|number} id - Product ID (MongoDB ObjectId or numeric)
  * @param {string} name - Product name
  * @returns {string} - Complete product detail URL
  */
@@ -28,8 +28,9 @@ export const generateProductUrl = (id, name) => {
 /**
  * Parse product ID from URL params
  * @param {object} params - React Router params
- * @returns {number} - Product ID
+ * @returns {string} - Product ID (MongoDB ObjectId as string)
  */
 export const getProductIdFromParams = (params) => {
-  return parseInt(params.id, 10);
+  // Return as string to support MongoDB ObjectId
+  return params.id;
 };

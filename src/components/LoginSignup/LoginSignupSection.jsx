@@ -17,7 +17,7 @@ export default function LoginSignupSection() {
   // Check if already logged in
   useEffect(() => {
     if (authService.isAuthenticated()) {
-      navigate('/home');
+      navigate('/dashboard');
     }
   }, [navigate]);
 
@@ -46,8 +46,8 @@ export default function LoginSignupSection() {
       const result = await authService.login(username, password);
 
       if (result.success) {
-        // Login successful - redirect to home
-        navigate('/home');
+        // Login successful - redirect to dashboard
+        navigate('/dashboard');
       } else {
         setError(result.error || 'Login failed. Please try again.');
       }

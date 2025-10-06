@@ -1,53 +1,64 @@
-import React, { useState } from 'react';
-import { getProductById } from '../../data/products';
+import React, { useState, useEffect } from 'react';
+import productService from '../../services/productService';
 
 export const ProductDetail = ({ productId }) => {
   const [activeTab, setActiveTab] = useState('description');
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Get product data by ID
-  const product = getProductById(productId);
+  // Fetch product from API
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!productId) return;
 
-  // Default content if product not found
-  const defaultContent = {
-    intro: [
-      "Uninhibited carnally hired played in whimpered dear gorilla koala depending and much yikes off far quetzal goodness and from for grimaced goodness unaccountably and meadowlark near unblushingly crucial scallop tightly neurotic hungrily some and dear furiously this apart.",
-      "Spluttered narrowly yikes left moth in yikes bowed this that grizzly much hello on spoon-fed that alas rethought much decently richly and wow against the frequent fluidly at formidable acceptably flapped besides and much circa far over the bucolically hey precarious goldfinch mastodon goodness gnashed a jellyfish and one however because."
-    ],
-    specifications: [
-      { label: 'Type Of Packing', value: 'Bottle' },
-      { label: 'Color', value: 'Green, Pink, Powder Blue, Purple' },
-      { label: 'Quantity Per Case', value: '100ml' },
-      { label: 'Ethyl Alcohol', value: '70%' },
-      { label: 'Piece In One', value: 'Carton' },
-    ],
-    additionalDesc: "Laconic overheard dear woodchuck wow this outrageously taut beaver hey hello far meadowlark imitatively egregiously hugged that yikes minimally unanimous pouted flirtatiously as beaver beheld above forward energetic across this jeepers beneficently cockily less a the raucously that magic upheld far so the this where crud then below after jeez enchanting drunkenly more much wow callously irrespective limpet.",
-    packaging: [
-      "Less lion goodness that euphemistically robin expeditiously bluebird smugly scratched far while thus cackled sheepishly rigid after due one assenting regarding censorious while occasional or this more crane went more as this less much amid overhung anathematic because much held one exuberantly sheep goodness so where rat wry well concomitantly.",
-      "Scallop or far crud plain remarkably far by thus far iguana lewd precociously and and less rattlesnake contrary caustic wow this near alas and next and pled the yikes articulate about as less cackled dalmatian in much less well jeering for the thanks blindly sentimental whimpered less across objectively fanciful grimaced wildly some wow and rose jeepers outgrew lugubrious luridly irrationally attractively dachshund."
-    ],
-    suggestedUse: [
-      'Refrigeration not necessary.',
-      'Stir before serving',
-    ],
-    otherIngredients: [
-      'Organic raw pecans, organic raw cashews.',
-      'This butter was produced using a LTG (Low Temperature Grinding) process',
-      'Made in machinery that processes tree nuts but does not process peanuts, gluten, dairy or soy',
-    ],
-    warnings: [
-      'Oil separation occurs naturally. May contain pieces of shell.'
-    ]
-  };
+      setLoading(true);
+      try {
+        const result = await productService.getProductById(productId);
+        if (result.success) {
+          setProduct(result.data.product);
+        }
+      } catch (err) {
+        console.error('Failed to fetch product details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Use product's detail description or fallback to default
-  const content = product?.detailDescription || defaultContent;
+    fetchProduct();
+  }, [productId]);
+
+  // Check if product has description
+  const hasDescription = product?.detailDescription && product?.detailDescription?.intro && product?.detailDescription?.intro.length > 0;
+  const content = product?.detailDescription;
 
   const tabs = [
     { id: 'description', label: 'Description' },
-    { id: 'additional', label: 'Additional info' },
     { id: 'vendor', label: 'Vendor' },
-    { id: 'reviews', label: 'Reviews (3)' },
+    { id: 'reviews', label: `Reviews (${product?.reviewCount || 0})` },
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="border border-[#ececec] rounded-[15px] bg-white p-8">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+            <p className="mt-4 text-gray-600">Loading details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If no product, show empty state
+  if (!product) {
+    return (
+      <div className="border border-[#ececec] rounded-[15px] bg-white p-8">
+        <p className="text-center text-gray-500">Product details not available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="border border-[#ececec] rounded-[15px] bg-white">
@@ -70,114 +81,184 @@ export const ProductDetail = ({ productId }) => {
       {/* Content */}
       <div className="px-[51px] pb-[51px]">
         {activeTab === 'description' && (
-          <div className="space-y-6">
-            {/* Intro Paragraphs */}
-            <div className="space-y-4">
-              {content.intro.map((paragraph, index) => (
-                <p key={index} className="text-[#7e7e7e] text-[16px] font-['Lato',sans-serif] leading-[24px]">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            {/* Specifications List */}
-            <div className="space-y-3">
-              {content.specifications.map((spec, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0" />
-                  <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] min-w-[165px]">
-                    {spec.label}
-                  </span>
-                  <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
-                    {spec.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Separator */}
-            <div className="h-px bg-[#7e7e7e] opacity-25" />
-
-            {/* Additional Description */}
-            <p className="text-[#7e7e7e] text-[16px] font-['Lato',sans-serif] leading-[24px]">
-              {content.additionalDesc}
-            </p>
-
-            {/* Packaging & Delivery Section */}
-            <div className="space-y-4">
-              <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
-                Packaging & Delivery
-              </h3>
-              <div className="h-px bg-[#7e7e7e] opacity-25" />
-              {content.packaging.map((paragraph, index) => (
-                <p key={index} className="text-[#7e7e7e] text-[16px] font-['Lato',sans-serif] leading-[24px]">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-
-            {/* Suggested Use Section */}
-            <div className="space-y-4">
-              <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
-                Suggested Use
-              </h3>
-              <div className="space-y-3">
-                {content.suggestedUse.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0" />
-                    <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
-                      {item}
-                    </span>
-                  </div>
-                ))}
+          <>
+            {!hasDescription ? (
+              <div className="py-8 text-center text-[#7e7e7e] text-[16px] font-['Lato',sans-serif]">
+                Description content coming soon...
               </div>
-            </div>
-
-            {/* Other Ingredients Section */}
-            <div className="space-y-4">
-              <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
-                Other Ingredients
-              </h3>
-              <div className="space-y-3">
-                {content.otherIngredients.map((item, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                    <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0 mt-2" />
-                    <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
-                      {item}
-                    </span>
+            ) : (
+              <div className="space-y-6">
+                {/* Intro Paragraphs */}
+                {content.intro && content.intro.length > 0 && (
+                  <div className="space-y-4">
+                    {content.intro.map((paragraph, index) => (
+                      <p key={index} className="text-[#7e7e7e] text-[16px] font-['Lato',sans-serif] leading-[24px]">
+                        {paragraph}
+                      </p>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                )}
 
-            {/* Warnings Section */}
-            <div className="space-y-4">
-              <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
-                Warnings
-              </h3>
-              <div className="space-y-3">
-                {content.warnings.map((item, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                    <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0 mt-2" />
-                    <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
-                      {item}
-                    </span>
+                {/* Specifications List */}
+                {content.specifications && content.specifications.length > 0 && (
+                  <div className="space-y-3">
+                    {content.specifications.map((spec, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0" />
+                        <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] min-w-[165px]">
+                          {spec.label}
+                        </span>
+                        <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
+                          {spec.value}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+                )}
 
-        {activeTab === 'additional' && (
-          <div className="py-8 text-center text-[#7e7e7e] text-[16px] font-['Lato',sans-serif]">
-            Additional information content coming soon...
-          </div>
+                {/* Separator */}
+                {content.additionalDesc && (
+                  <>
+                    <div className="h-px bg-[#7e7e7e] opacity-25" />
+                    <p className="text-[#7e7e7e] text-[16px] font-['Lato',sans-serif] leading-[24px]">
+                      {content.additionalDesc}
+                    </p>
+                  </>
+                )}
+
+                {/* Packaging & Delivery Section */}
+                {content.packaging && content.packaging.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
+                      Packaging & Delivery
+                    </h3>
+                    <div className="h-px bg-[#7e7e7e] opacity-25" />
+                    {content.packaging.map((paragraph, index) => (
+                      <p key={index} className="text-[#7e7e7e] text-[16px] font-['Lato',sans-serif] leading-[24px]">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {/* Suggested Use Section */}
+                {content.suggestedUse && content.suggestedUse.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
+                      Suggested Use
+                    </h3>
+                    <div className="space-y-3">
+                      {content.suggestedUse.map((item, index) => (
+                        <div key={index} className="flex items-center gap-4">
+                          <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0" />
+                          <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
+                            {item}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Other Ingredients Section */}
+                {content.otherIngredients && content.otherIngredients.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
+                      Other Ingredients
+                    </h3>
+                    <div className="space-y-3">
+                      {content.otherIngredients.map((item, index) => (
+                        <div key={index} className="flex items-start gap-4">
+                          <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0 mt-2" />
+                          <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
+                            {item}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Warnings Section */}
+                {content.warnings && content.warnings.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px]">
+                      Warnings
+                    </h3>
+                    <div className="space-y-3">
+                      {content.warnings.map((item, index) => (
+                        <div key={index} className="flex items-start gap-4">
+                          <div className="w-1.5 h-1.5 bg-[#9b9b9b] rounded-full flex-shrink-0 mt-2" />
+                          <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif]">
+                            {item}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === 'vendor' && (
-          <div className="py-8 text-center text-[#7e7e7e] text-[16px] font-['Lato',sans-serif]">
-            Vendor information content coming soon...
+          <div className="space-y-6">
+            {/* Vendor Information */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <h3 className="text-[#253d4e] text-[24px] font-bold font-['Quicksand',sans-serif] leading-[28.8px] mb-4">
+                Vendor Information
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] font-semibold min-w-[120px]">
+                    Vendor Name:
+                  </span>
+                  <span className="text-[#3bb77e] text-[16px] font-['Lato',sans-serif] font-bold">
+                    {product?.vendor || 'N/A'}
+                  </span>
+                </div>
+
+                {product?.type && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] font-semibold min-w-[120px]">
+                      Product Type:
+                    </span>
+                    <span className="text-[#253d4e] text-[14px] font-['Lato',sans-serif]">
+                      {product.type}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] font-semibold min-w-[120px]">
+                    SKU:
+                  </span>
+                  <span className="text-[#253d4e] text-[14px] font-['Lato',sans-serif]">
+                    {product?.sku || 'N/A'}
+                  </span>
+                </div>
+
+                {product?.category && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] font-semibold min-w-[120px]">
+                      Category:
+                    </span>
+                    <span className="text-[#3bb77e] text-[14px] font-['Lato',sans-serif]">
+                      {product.category.name || product.category}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional Vendor Info */}
+            <div>
+              <p className="text-[#7e7e7e] text-[14px] font-['Lato',sans-serif] leading-[22px]">
+                This product is supplied by <span className="font-bold text-[#3bb77e]">{product?.vendor}</span>.
+                All products are quality checked and guaranteed fresh.
+              </p>
+            </div>
           </div>
         )}
 
