@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Dashboard, ViewProduct, Checkout, DetailProduct, ShoppingCart, LoginSignup, Orders } from "./pages";
+import { Dashboard, ViewProduct, Checkout, DetailProduct, ListProduct, LoginSignup, Orders, Categories } from "./pages";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -45,10 +45,10 @@ function App() {
           }
         />
         <Route
-          path="/products/shopping-cart"
+          path="/products/list"
           element={
             <ProtectedRoute>
-              <ShoppingCart />
+              <ListProduct />
             </ProtectedRoute>
           }
         />
@@ -57,6 +57,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Orders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute>
+              <Categories />
             </ProtectedRoute>
           }
         />

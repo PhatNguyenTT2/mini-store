@@ -27,12 +27,15 @@ const Orders = () => {
     page: 1,
     per_page: 20,
     status: '',
-    payment_status: '',
-    sort_by: 'newest'
+    payment_status: ''
   });
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sort state
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   // Fetch orders from API
   const fetchOrders = async () => {
@@ -97,19 +100,78 @@ const Orders = () => {
   };
 
   // Handle filter changes
-  const handleSortChange = (newSortBy) => {
-    setFilters({ ...filters, sort_by: newSortBy, page: 1 });
-  };
-
   const handleItemsPerPageChange = (newPerPage) => {
     setFilters({ ...filters, per_page: newPerPage, page: 1 });
   };
 
   const handleSearch = (query) => {
-    // TODO: Implement search on backend
-    // For now, just update the search query
-    console.log('Searching for:', query);
-    setSearchQuery(query);
+    // Search by ID or Name
+    const searchLower = query.toLowerCase().trim();
+
+    if (!searchLower) {
+      // If search is empty, fetch all orders
+      fetchOrders();
+      return;
+    }
+
+    // Filter orders locally (or you can implement backend search)
+    const filtered = orders.filter(order => {
+      const orderNumber = (order.orderNumber || '').toLowerCase();
+      const customerName = (order.customerName || '').toLowerCase();
+      const orderId = (order.id || '').toLowerCase();
+
+      return orderNumber.includes(searchLower) ||
+        customerName.includes(searchLower) ||
+        orderId.includes(searchLower);
+    });
+
+    setOrders(filtered);
+  };
+
+  // Handle column sort
+  const handleColumnSort = (field) => {
+    let newSortOrder = 'asc';
+
+    // Toggle sort order if clicking the same field
+    if (sortField === field) {
+      newSortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    }
+
+    setSortField(field);
+    setSortOrder(newSortOrder);
+
+    // Sort orders locally
+    const sorted = [...orders].sort((a, b) => {
+      let aVal = a[field];
+      let bVal = b[field];
+
+      // Handle different data types
+      if (field === 'total') {
+        aVal = parseFloat(aVal) || 0;
+        bVal = parseFloat(bVal) || 0;
+      } else if (field === 'date') {
+        aVal = new Date(aVal).getTime();
+        bVal = new Date(bVal).getTime();
+      } else {
+        aVal = String(aVal || '').toLowerCase();
+        bVal = String(bVal || '').toLowerCase();
+      }
+
+      if (newSortOrder === 'asc') {
+        return aVal > bVal ? 1 : -1;
+      } else {
+        return aVal < bVal ? 1 : -1;
+      }
+    });
+
+    setOrders(sorted);
+  };
+
+  // Handle apply changes (from Actions dropdown)
+  const handleApplyChanges = async () => {
+    console.log('Applying all pending changes...');
+    await fetchOrders();
+    alert('Changes applied successfully!');
   };
 
   return (
@@ -120,13 +182,12 @@ const Orders = () => {
 
         {/* Order List Header */}
         <OrderListHeader
-          sortBy={filters.sort_by}
-          onSortChange={handleSortChange}
           itemsPerPage={filters.per_page}
           onItemsPerPageChange={handleItemsPerPageChange}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
+          onApplyChanges={handleApplyChanges}
         />
 
         {/* Loading State */}
@@ -156,6 +217,9 @@ const Orders = () => {
             orders={orders}
             onStatusChange={handleStatusChange}
             onPaymentStatusChange={handlePaymentStatusChange}
+            onSort={handleColumnSort}
+            sortField={sortField}
+            sortOrder={sortOrder}
           />
         )}
 

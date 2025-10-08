@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export const OrderListHeader = ({
+export const CategoryListHeader = ({
   itemsPerPage = 20,
   onItemsPerPageChange,
   searchQuery = '',
   onSearchChange,
   onSearch,
-  onApplyChanges,
-  selectedCount = 0
+  onAddCategory
 }) => {
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -28,13 +27,14 @@ export const OrderListHeader = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showActionsDropdown]);
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between gap-3">
         {/* Title */}
         <div className="flex items-center">
           <h2 className="text-[13px] font-normal font-['Poppins',sans-serif] text-black leading-[20px] whitespace-nowrap">
-            All Orders
+            All Categories
           </h2>
         </div>
 
@@ -64,7 +64,7 @@ export const OrderListHeader = ({
             <div className="flex h-[36px] gap-1">
               <input
                 type="text"
-                placeholder="Search by ID or Name..."
+                placeholder="Search by Name..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
                 onKeyPress={(e) => {
@@ -129,16 +129,15 @@ export const OrderListHeader = ({
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
               <button
                 onClick={() => {
-                  onApplyChanges && onApplyChanges();
+                  onAddCategory && onAddCategory();
                   setShowActionsDropdown(false);
                 }}
                 className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center gap-2"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M13.3333 7.33333V4L11.3333 2H4.66667C3.93333 2 3.33333 2.6 3.33333 3.33333V12.6667C3.33333 13.4 3.93333 14 4.66667 14H8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M10 14L12 16L16 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Apply Changes
+                Add Category
               </button>
 
               <div className="border-t border-gray-200 my-1"></div>

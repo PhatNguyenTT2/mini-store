@@ -66,14 +66,14 @@ export const NavigationMenuSection = () => {
       items: [
         { name: 'Dashboard', icon: LayoutGrid, href: '/dashboard' },
         { name: 'Orders', icon: ShoppingBag, arrow: false, href: '/orders' },
-        { name: 'Category', icon: BookAIcon },
+        { name: 'Categories', icon: BookAIcon, href: '/categories' },
         {
           name: 'Products',
           icon: Package2,
           arrow: true,
           submenu: [
+            { name: 'List', href: '/products/list' },
             { name: 'View', href: '/products/view' },
-            { name: 'Shopping Cart', href: '/products/shopping-cart' },
             { name: 'Checkout', href: '/products/checkout' },
           ]
         },

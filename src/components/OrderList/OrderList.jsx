@@ -1,25 +1,39 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange }) => {
-  const [selectedOrders, setSelectedOrders] = useState([]);
+export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, onSort, sortField, sortOrder }) => {
   const [activeDropdown, setActiveDropdown] = useState(null); // Format: 'order-{orderId}' hoặc 'payment-{orderId}'
+  const [pendingChanges, setPendingChanges] = useState({}); // Track pending changes
   const dropdownRef = useRef(null);
 
-  // Toggle select all orders
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      setSelectedOrders(orders.map(order => order.id));
-    } else {
-      setSelectedOrders([]);
+  // Handle sort click
+  const handleSortClick = (field) => {
+    if (onSort) {
+      onSort(field);
     }
   };
 
-  // Toggle individual order selection
-  const handleSelectOrder = (orderId) => {
-    if (selectedOrders.includes(orderId)) {
-      setSelectedOrders(selectedOrders.filter(id => id !== orderId));
+  // Get sort icon with color
+  const getSortIcon = (field) => {
+    if (sortField !== field) {
+      return (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
+          <path d="M6 3V9M6 3L4 5M6 3L8 5" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    }
+
+    if (sortOrder === 'asc') {
+      return (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
+          <path d="M6 9V3M6 3L4 5M6 3L8 5" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
     } else {
-      setSelectedOrders([...selectedOrders, orderId]);
+      return (
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
+          <path d="M6 3V9M6 9L4 7M6 9L8 7" stroke="#10B981" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
     }
   };
 
@@ -105,46 +119,52 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange }
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Scrollable Container - Remove overflow-hidden để dropdown có thể hiển thị ra ngoài */}
+      {/* Scrollable Container */}
       <div className="overflow-x-auto overflow-y-visible">
-        <div className="min-w-[1360px]">
+        <div className="min-w-[1200px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
-            {/* Checkbox Column */}
-            <div className="w-[80px] px-3 flex items-center justify-center flex-shrink-0">
-              <input
-                type="checkbox"
-                checked={selectedOrders.length === orders.length && orders.length > 0}
-                onChange={handleSelectAll}
-                className="w-[14px] h-[14px] bg-white border border-[rgba(0,0,0,0.25)] rounded-[3px] cursor-pointer"
-              />
-            </div>
-
-            {/* ID Column */}
-            <div className="w-[120px] px-3 flex items-center flex-shrink-0">
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+            {/* ID Column - Sortable */}
+            <div
+              className="w-[120px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('orderNumber')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 ID
+                {getSortIcon('orderNumber')}
               </p>
             </div>
 
-            {/* Name Column */}
-            <div className="flex-1 min-w-[200px] px-3 flex items-center">
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+            {/* Name Column - Sortable */}
+            <div
+              className="flex-1 min-w-[200px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('customerName')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 Name
+                {getSortIcon('customerName')}
               </p>
             </div>
 
-            {/* Date Column */}
-            <div className="w-[180px] px-3 flex items-center flex-shrink-0">
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+            {/* Date Column - Sortable */}
+            <div
+              className="w-[180px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('date')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 Date
+                {getSortIcon('date')}
               </p>
             </div>
 
-            {/* Total Column */}
-            <div className="w-[140px] px-3 flex items-center flex-shrink-0">
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+            {/* Total Column - Sortable */}
+            <div
+              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('total')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 Total
+                {getSortIcon('total')}
               </p>
             </div>
 
@@ -182,16 +202,6 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange }
                   className={`flex items-center h-[60px] hover:bg-gray-50 transition-colors ${index !== orders.length - 1 ? 'border-b border-gray-100' : ''
                     }`}
                 >
-                  {/* Checkbox */}
-                  <div className="w-[80px] px-3 flex items-center justify-center flex-shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={selectedOrders.includes(order.id)}
-                      onChange={() => handleSelectOrder(order.id)}
-                      className="w-[14px] h-[14px] bg-white border border-[rgba(0,0,0,0.25)] rounded-[3px] cursor-pointer"
-                    />
-                  </div>
-
                   {/* ID - Display orderNumber */}
                   <div className="w-[120px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-emerald-600 leading-[20px]">
@@ -303,38 +313,57 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange }
                   </div>
 
                   {/* Actions */}
-                  <div className="w-[140px] px-3 flex items-center justify-center flex-shrink-0">
-                    <button
-                      className="p-2 rounded hover:bg-gray-200 transition-colors"
-                      onClick={() => {
-                        // TODO: View order details action
-                        console.log('View order:', order.id);
-                      }}
-                      title="View Order"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                  <div className="w-[140px] px-3 flex items-center justify-center flex-shrink-0 relative">
+                    <div ref={activeDropdown === `action-${order.id}` ? dropdownRef : null}>
+                      <button
+                        onClick={() => toggleDropdown(`action-${order.id}`)}
+                        className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                        title="Actions"
                       >
-                        <path
-                          d="M1 8C1 8 3 4 8 4C13 4 15 8 15 8C15 8 13 12 8 12C3 12 1 8 1 8Z"
-                          stroke="#6B7280"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
-                          stroke="#6B7280"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </button>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="3" cy="8" r="1.5" fill="#6B7280" />
+                          <circle cx="8" cy="8" r="1.5" fill="#6B7280" />
+                          <circle cx="13" cy="8" r="1.5" fill="#6B7280" />
+                        </svg>
+                      </button>
+
+                      {/* Dropdown Menu for Actions */}
+                      {activeDropdown === `action-${order.id}` && (
+                        <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
+                          <button
+                            onClick={() => {
+                              console.log('View order:', order.id);
+                              setActiveDropdown(null);
+                            }}
+                            className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M1 8C1 8 3 4 8 4C13 4 15 8 15 8C15 8 13 12 8 12C3 12 1 8 1 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            View
+                          </button>
+
+                          <div className="border-t border-gray-200 my-1"></div>
+
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to delete order ${order.orderNumber}?`)) {
+                                console.log('Delete order:', order.id);
+                              }
+                              setActiveDropdown(null);
+                            }}
+                            className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
