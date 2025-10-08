@@ -27,17 +27,33 @@
 
 ## 🎯 Overview
 
-**Mini Store Admin Dashboard** là giao diện quản trị viên cho hệ thống e-commerce. Frontend này được xây dựng với React và đang sử dụng **mock data** để phát triển UI/UX. Backend team có thể dễ dàng tích hợp API thực bằng cách thay thế các functions trong `src/data/` và `src/utils/`.
+**Mini Store Admin Dashboard** là giao diện quản trị toàn diện cho hệ thống e-commerce. Frontend này được xây dựng với React và đang sử dụng **mock data** để phát triển UI/UX. Hệ thống hỗ trợ không chỉ quản lý sản phẩm/đơn hàng mà còn bao gồm **quản lý kho**, **nhà cung cấp**, **đơn mua hàng**, **thanh toán**, và **báo cáo phân tích**.
+
+### System Capabilities
+
+#### ✅ **Implemented Features**
+- **Authentication** - Login/Signup interface with JWT ready
+- **Dashboard** - Sales charts, revenue statistics, order overview
+- **Product Management** - Full CRUD, filtering, pagination, detail views
+- **Category Management** - Hierarchical categories
+- **Order Management** - Order creation, status tracking, history
+
+#### 🟡 **Planned Features** (Backend Models Ready)
+- **Customer Management (CRM)** - Customer profiles, purchase history, loyalty program
+- **Inventory Management** - Real-time stock tracking, movement history, reorder alerts
+- **Payment Processing** - Transaction tracking, multiple payment methods, refunds
+- **Procurement (B2B)** - Purchase orders, supplier orders, approval workflow
+- **Supplier Management** - Vendor database, payment terms, performance tracking
+- **Business Intelligence** - Sales reports, revenue analytics, profit & loss, inventory reports
 
 ### Current Status
-- ✅ **UI/UX Complete**: Tất cả pages và components đã hoàn thiện
-- ✅ **Authentication UI Ready**: Login/Signup interface implemented (at `/` and `/signup`)
+- ✅ **Core UI Complete**: Product, Category, Order, Authentication pages
+- ✅ **Authentication UI Ready**: Login/Signup interface (at `/` and `/signup`)
 - ✅ **Mock Data Ready**: Sample data sẵn sàng cho 15 products
-- ✅ **Routing Updated**: New routing structure with authentication flow
-  - `/` → Login Page
-  - `/signup` → Signup Page
-  - `/dashboard` → Admin Dashboard (previously at `/`)
-- ⏳ **Backend Integration**: Chờ API endpoints từ backend team (especially auth endpoints)
+- ✅ **Routing System**: Complete routing structure with authentication flow
+- 🟡 **Backend Integration**: 4/10 modules có API (Products, Categories, Orders, Auth)
+- 🔜 **Next Phase**: Customer Management, Inventory System, Payment Processing
+- 📊 **Backend Models**: 10 models đã sẵn sàng, cần implement controllers
 
 ---
 
@@ -121,9 +137,9 @@ mini-store/
 
 ## ✨ Features
 
-### Implemented Features
+### ✅ Implemented Features
 
-#### 1. **Authentication System** 🔐 *(NEW)*
+#### 1. **Authentication System** 🔐
 - 🔑 Login/Signup dual-tab interface
 - 🔄 URL-synced tab switching (`/` for login, `/signup` for register)
 - ✅ Form validation (HTML5)
@@ -166,6 +182,229 @@ mini-store/
 - 📋 Order form
 - 💳 Payment interface
 - ✅ Ready for backend integration
+
+---
+
+### 🟡 Planned Features (Backend Models Ready)
+
+#### 7. **Customer Management (CRM)** 📋 *(Next Phase)*
+**Purpose**: Complete customer relationship management
+
+**Features to Implement**:
+- 👥 Customer profile management (CRUD)
+- 📊 Customer statistics dashboard
+  - Total customers count
+  - Customer types (retail, wholesale, VIP)
+  - Customer segmentation
+- 🛍️ Purchase history per customer
+  - Order list
+  - Total spent
+  - Average order value
+  - Last purchase date
+- 🎁 Loyalty program
+  - Points management
+  - Points earning rules
+  - Points redemption
+- 📈 Customer analytics
+  - Top customers by revenue
+  - Customer lifetime value
+  - Purchase frequency
+  - Customer retention rate
+
+**UI Components Needed**:
+- Customer list page with filters (type, status, search)
+- Customer detail view
+- Customer creation/edit form
+- Purchase history timeline
+- Loyalty points interface
+- Customer statistics cards
+
+---
+
+#### 8. **Inventory Management** 📦 *(Next Phase)*
+**Purpose**: Real-time stock tracking and warehouse management
+
+**Features to Implement**:
+- 📊 Inventory dashboard
+  - Total stock value
+  - Low stock alerts
+  - Out of stock items
+  - Stock movement summary
+- 📦 Product inventory details
+  - Quantity on hand
+  - Quantity reserved (pending orders)
+  - Quantity available
+  - Warehouse location
+- 📜 Stock movement history
+  - IN movements (purchases, returns)
+  - OUT movements (sales, damages)
+  - Adjustments (manual corrections)
+  - Reserved/Released (order processing)
+- 🔔 Reorder alerts
+  - Products below reorder point
+  - Suggested reorder quantity
+  - Reorder notification system
+- ⚙️ Manual stock adjustment
+  - Adjustment form
+  - Reason tracking
+  - User audit trail
+
+**UI Components Needed**:
+- Inventory dashboard with KPIs
+- Product inventory list table
+- Stock movement history viewer
+- Low stock alert page
+- Manual adjustment form
+- Stock reconciliation interface
+
+---
+
+#### 9. **Payment Processing** 💰 *(Phase 4)*
+**Purpose**: Complete payment transaction management
+
+**Features to Implement**:
+- 💳 Payment recording
+  - Record customer payments
+  - Multiple payment methods (cash, card, bank transfer, e-wallet)
+  - Partial payment support
+  - Link to orders
+- 📜 Payment history
+  - All payments list
+  - Filter by date, method, status
+  - Search by order number, customer
+- 💵 Refund processing
+  - Refund request form
+  - Refund approval workflow
+  - Refund history
+- 📊 Payment analytics
+  - Total revenue by period
+  - Payment method breakdown
+  - Pending payments
+  - Refunded amounts
+
+**UI Components Needed**:
+- Payment recording form
+- Payment history page
+- Payment detail modal
+- Refund processing interface
+- Payment statistics cards
+- Payment method selector
+
+---
+
+#### 🔟 **Procurement System (B2B)** 🏢 *(Phase 5)*
+**Purpose**: Supplier and purchase order management
+
+##### A. **Supplier Management**
+**Features to Implement**:
+- 🏢 Supplier profiles (CRUD)
+  - Company information
+  - Contact person
+  - Bank account details
+  - Tax ID
+- 📊 Supplier statistics
+  - Total purchase orders
+  - Total purchase amount
+  - Payment terms
+  - Current debt
+  - Credit limit
+- ⭐ Supplier performance
+  - Supplier rating
+  - Delivery performance
+  - Product quality rating
+- 📦 Products supplied
+  - List of products from supplier
+  - Product categories
+
+**UI Components Needed**:
+- Supplier list page
+- Supplier detail view
+- Supplier creation/edit form
+- Supplier statistics dashboard
+- Product-supplier mapping interface
+
+##### B. **Purchase Orders**
+**Features to Implement**:
+- 📝 PO creation workflow
+  - Select supplier
+  - Add products with quantities
+  - Set prices
+  - Calculate totals (subtotal, shipping, tax, discount)
+- 📋 PO management
+  - PO list with filters (status, supplier, date)
+  - PO detail view
+  - PO status tracking (draft → pending → approved → received)
+- ✅ PO approval workflow
+  - Submit for approval
+  - Approve/Reject PO
+  - Approval history
+- 📦 Receiving process
+  - Mark items as received
+  - Partial receiving support
+  - Update inventory automatically
+- 💰 Payment tracking
+  - Link payments to PO
+  - Track paid/unpaid amounts
+  - Payment status updates
+
+**UI Components Needed**:
+- PO creation form (multi-step)
+- PO list page with filters
+- PO detail view
+- PO approval interface
+- Receiving form
+- PO-Payment linking interface
+
+---
+
+#### 1️⃣1️⃣ **Business Intelligence** 📊 *(Phase 6)*
+**Purpose**: Comprehensive reporting and analytics
+
+**Features to Implement**:
+- 📈 Sales reports
+  - Daily/weekly/monthly sales
+  - Sales by category
+  - Sales by product
+  - Sales trends
+- 💰 Revenue reports
+  - Revenue by period
+  - Revenue by category
+  - Revenue by customer type
+- 📊 Profit & Loss reports
+  - Total revenue
+  - Total cost (from purchase orders)
+  - Gross profit
+  - Profit margin
+- 📦 Inventory reports
+  - Current stock levels
+  - Stock movements
+  - Slow-moving items
+  - Fast-moving items
+- 👥 Customer analytics
+  - New customers
+  - Customer retention
+  - Customer lifetime value
+  - Top customers
+- 🏆 Product performance
+  - Best sellers
+  - Worst performers
+  - Product ratings
+- 🏢 Supplier performance
+  - Top suppliers
+  - Delivery performance
+  - Payment history
+- 📤 Export functionality
+  - PDF export
+  - Excel export
+  - CSV export
+
+**UI Components Needed**:
+- Reports dashboard
+- Report generation form (date range, type selection)
+- Interactive charts (line, bar, pie, area)
+- Data tables with sorting/filtering
+- Export buttons
+- Report templates
 
 ---
 
@@ -618,19 +857,157 @@ const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 ---
 
-### 📡 Expected API Endpoints
+### 📡 API Endpoints Reference
 
-Backend team cần implement các endpoints sau:
+Backend team cần implement các endpoints sau để hỗ trợ tất cả tính năng frontend.
 
-#### **Products**
+#### ✅ **Authentication** (Implemented)
 
-| Method | Endpoint | Description | Query Params | Response |
-|--------|----------|-------------|--------------|----------|
-| `GET` | `/api/products` | Get product list | `page`, `per_page`, `category`, `min_price`, `max_price`, `sort_by` | `{ products: [], pagination: {...} }` |
-| `GET` | `/api/products/:id` | Get product detail | None | `{ product: {...} }` |
-| `POST` | `/api/products` | Create product | None (body) | `{ product: {...} }` |
-| `PUT` | `/api/products/:id` | Update product | None (body) | `{ product: {...} }` |
-| `DELETE` | `/api/products/:id` | Delete product | None | `{ success: true }` |
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `POST` | `/api/login` | Login admin | Public | ✅ |
+| `POST` | `/api/login/register` | Register admin | Public | ✅ |
+| `POST` | `/api/login/logout` | Logout | Required | ✅ |
+| `GET` | `/api/login/me` | Get current user | Required | ✅ |
+
+---
+
+#### ✅ **Products** (Implemented)
+
+| Method | Endpoint | Description | Query Params | Auth | Status |
+|--------|----------|-------------|--------------|------|--------|
+| `GET` | `/api/products` | Get product list | `page`, `limit`, `category`, `minPrice`, `maxPrice`, `search`, `sort` | Public | ✅ |
+| `GET` | `/api/products/:id` | Get product detail | None | Public | ✅ |
+| `POST` | `/api/products` | Create product | None (body) | Admin | ✅ |
+| `PUT` | `/api/products/:id` | Update product | None (body) | Admin | ✅ |
+| `DELETE` | `/api/products/:id` | Delete product | None | Admin | ✅ |
+
+---
+
+#### ✅ **Categories** (Implemented)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/categories` | Get all categories | Public | ✅ |
+| `GET` | `/api/categories/:id` | Get category detail | Public | ✅ |
+| `POST` | `/api/categories` | Create category | Admin | ✅ |
+| `PUT` | `/api/categories/:id` | Update category | Admin | ✅ |
+| `DELETE` | `/api/categories/:id` | Delete category | Admin | ✅ |
+
+---
+
+#### ✅ **Orders** (Implemented)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/orders` | List all orders | Admin | ✅ |
+| `GET` | `/api/orders/:id` | Get order detail | Required | ✅ |
+| `POST` | `/api/orders` | Create order | Public | ✅ |
+| `PATCH` | `/api/orders/:id/status` | Update order status | Admin | ✅ |
+| `GET` | `/api/orders/my-orders` | Get user's orders | Required | ✅ |
+
+---
+
+#### 🟡 **Customers** (Pending Implementation)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/customers` | List all customers | Admin | 🟡 |
+| `GET` | `/api/customers/:id` | Get customer detail | Admin | 🟡 |
+| `GET` | `/api/customers/:id/orders` | Get customer orders | Admin | 🟡 |
+| `GET` | `/api/customers/:id/stats` | Get customer statistics | Admin | 🟡 |
+| `POST` | `/api/customers` | Create customer | Admin | 🟡 |
+| `PUT` | `/api/customers/:id` | Update customer | Admin | 🟡 |
+| `DELETE` | `/api/customers/:id` | Delete customer | Admin | 🟡 |
+| `POST` | `/api/customers/:id/loyalty` | Add loyalty points | Admin | 🟡 |
+
+**Query Params for List**: `page`, `limit`, `type` (retail/wholesale/vip), `search`, `sort`
+
+---
+
+#### 🟡 **Inventory** (Pending Implementation)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/inventory` | List all inventory | Admin | 🟡 |
+| `GET` | `/api/inventory/:productId` | Get product inventory | Admin | 🟡 |
+| `GET` | `/api/inventory/low-stock` | Get low stock items | Admin | 🟡 |
+| `GET` | `/api/inventory/:productId/movements` | Get movement history | Admin | 🟡 |
+| `POST` | `/api/inventory/adjust` | Manual stock adjustment | Admin | 🟡 |
+| `POST` | `/api/inventory/reserve` | Reserve stock | System | 🟡 |
+| `POST` | `/api/inventory/release` | Release reserved stock | System | 🟡 |
+
+**Query Params for List**: `page`, `limit`, `lowStock` (boolean), `outOfStock` (boolean), `search`
+
+---
+
+#### 🟡 **Payments** (Pending Implementation)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/payments` | List all payments | Admin | 🟡 |
+| `GET` | `/api/payments/:id` | Get payment detail | Admin | 🟡 |
+| `GET` | `/api/payments/order/:orderId` | Get order payments | Admin | 🟡 |
+| `GET` | `/api/payments/stats` | Payment statistics | Admin | 🟡 |
+| `POST` | `/api/payments` | Record payment | Admin | 🟡 |
+| `POST` | `/api/payments/:id/refund` | Process refund | Admin | 🟡 |
+
+**Query Params for List**: `page`, `limit`, `type` (sales/purchase), `method`, `status`, `startDate`, `endDate`
+
+---
+
+#### 🟡 **Purchase Orders** (Pending Implementation)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/purchase-orders` | List all POs | Admin | 🟡 |
+| `GET` | `/api/purchase-orders/:id` | Get PO detail | Admin | 🟡 |
+| `POST` | `/api/purchase-orders` | Create PO | Admin | 🟡 |
+| `PUT` | `/api/purchase-orders/:id` | Update PO | Admin | 🟡 |
+| `POST` | `/api/purchase-orders/:id/approve` | Approve PO | Admin | 🟡 |
+| `POST` | `/api/purchase-orders/:id/receive` | Mark received | Admin | 🟡 |
+| `DELETE` | `/api/purchase-orders/:id` | Cancel PO | Admin | 🟡 |
+
+**Query Params for List**: `page`, `limit`, `status`, `supplier`, `startDate`, `endDate`
+
+---
+
+#### 🟡 **Suppliers** (Pending Implementation)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/suppliers` | List all suppliers | Admin | 🟡 |
+| `GET` | `/api/suppliers/:id` | Get supplier detail | Admin | 🟡 |
+| `GET` | `/api/suppliers/:id/purchase-orders` | Get supplier POs | Admin | 🟡 |
+| `GET` | `/api/suppliers/:id/stats` | Get supplier stats | Admin | 🟡 |
+| `POST` | `/api/suppliers` | Create supplier | Admin | 🟡 |
+| `PUT` | `/api/suppliers/:id` | Update supplier | Admin | 🟡 |
+| `DELETE` | `/api/suppliers/:id` | Delete supplier | Admin | 🟡 |
+
+**Query Params for List**: `page`, `limit`, `search`, `paymentTerms`, `isActive`
+
+---
+
+#### 🟡 **Reports** (Pending Implementation)
+
+| Method | Endpoint | Description | Auth | Status |
+|--------|----------|-------------|------|--------|
+| `GET` | `/api/reports` | List all reports | Admin | 🟡 |
+| `GET` | `/api/reports/:id` | Get report detail | Admin | 🟡 |
+| `POST` | `/api/reports/generate` | Generate report | Admin | 🟡 |
+| `GET` | `/api/reports/sales` | Sales report | Admin | 🟡 |
+| `GET` | `/api/reports/inventory` | Inventory report | Admin | 🟡 |
+| `GET` | `/api/reports/revenue` | Revenue report | Admin | 🟡 |
+| `GET` | `/api/reports/profit` | Profit & loss | Admin | 🟡 |
+| `GET` | `/api/reports/customer` | Customer analytics | Admin | 🟡 |
+| `GET` | `/api/reports/product` | Product performance | Admin | 🟡 |
+| `GET` | `/api/reports/supplier` | Supplier performance | Admin | 🟡 |
+
+**Query Params**: `type`, `startDate`, `endDate`, `format` (json/pdf/excel/csv)
+
+---
+
+### Response Format Standards
 
 #### **Product List Response Format**
 
@@ -997,54 +1374,364 @@ import './ComponentName.css';
 
 ---
 
+## 🗺️ Development Roadmap
+
+### Phase 1: Core E-commerce ✅ (Completed)
+- [x] Authentication UI (Login/Signup)
+- [x] Dashboard with sales chart
+- [x] Product listing with filters
+- [x] Product detail pages
+- [x] Category management UI
+- [x] Order management UI
+- [x] Shopping cart interface
+- [x] Checkout flow
+- [x] Routing system
+- [x] Mock data layer
+
+**Status**: ✅ Complete | **Duration**: 8 weeks
+
+---
+
+### Phase 2: Customer Management 🟡 (Next - 3-4 weeks)
+
+#### Frontend Tasks
+- [ ] **Customer List Page**
+  - [ ] Customer table with pagination
+  - [ ] Filters (type, status, search)
+  - [ ] Sort by name, total spent, orders
+  - [ ] Quick actions (view, edit, delete)
+
+- [ ] **Customer Detail Page**
+  - [ ] Customer profile information
+  - [ ] Statistics cards (total spent, orders, avg order value)
+  - [ ] Purchase history table
+  - [ ] Loyalty points display
+  - [ ] Edit customer modal
+
+- [ ] **Customer Creation/Edit Form**
+  - [ ] Form with validation
+  - [ ] Customer type selection
+  - [ ] Address fields
+  - [ ] Contact information
+
+- [ ] **API Integration**
+  - [ ] Create `customerService.js`
+  - [ ] Implement CRUD operations
+  - [ ] Connect to backend endpoints
+
+**Backend Dependencies**: Customer API endpoints (GET, POST, PUT, DELETE)
+
+---
+
+### Phase 3: Inventory Management 🟡 (4-5 weeks)
+
+#### Frontend Tasks
+- [ ] **Inventory Dashboard**
+  - [ ] KPI cards (total stock value, low stock, out of stock)
+  - [ ] Stock status charts
+  - [ ] Quick alerts section
+
+- [ ] **Inventory List Page**
+  - [ ] Product inventory table
+  - [ ] Stock levels (on hand, reserved, available)
+  - [ ] Warehouse location
+  - [ ] Reorder alerts
+  - [ ] Filter by stock status
+
+- [ ] **Stock Movement History**
+  - [ ] Movement timeline
+  - [ ] Filter by type (in/out/adjustment)
+  - [ ] User audit trail
+  - [ ] Reason display
+
+- [ ] **Manual Adjustment Interface**
+  - [ ] Adjustment form
+  - [ ] Reason selection/input
+  - [ ] Quantity input with validation
+  - [ ] Confirmation modal
+
+- [ ] **Low Stock Alerts**
+  - [ ] Alert notifications
+  - [ ] Low stock products list
+  - [ ] Reorder suggestions
+
+- [ ] **API Integration**
+  - [ ] Create `inventoryService.js`
+  - [ ] Real-time stock updates
+  - [ ] Movement tracking
+
+**Backend Dependencies**: Inventory API endpoints
+
+---
+
+### Phase 4: Payment Processing 🟡 (2-3 weeks)
+
+#### Frontend Tasks
+- [ ] **Payment History Page**
+  - [ ] Payment list table
+  - [ ] Filter by date, method, status
+  - [ ] Search by order number
+  - [ ] Quick view payment details
+
+- [ ] **Payment Recording Form**
+  - [ ] Order selection
+  - [ ] Amount input
+  - [ ] Payment method selector
+  - [ ] Transaction ID field
+  - [ ] Notes
+
+- [ ] **Refund Processing Interface**
+  - [ ] Refund request form
+  - [ ] Refund reason selection
+  - [ ] Partial/full refund option
+  - [ ] Confirmation workflow
+
+- [ ] **Payment Statistics**
+  - [ ] Revenue by payment method
+  - [ ] Pending payments
+  - [ ] Refunded amounts
+  - [ ] Charts and graphs
+
+- [ ] **API Integration**
+  - [ ] Create `paymentService.js`
+  - [ ] Payment recording
+  - [ ] Refund processing
+
+**Backend Dependencies**: Payment API endpoints
+
+---
+
+### Phase 5: Procurement (B2B) 🟡 (5-6 weeks)
+
+#### Frontend Tasks
+
+##### A. Supplier Management (2-3 weeks)
+- [ ] **Supplier List Page**
+  - [ ] Supplier table
+  - [ ] Filters and search
+  - [ ] Quick actions
+
+- [ ] **Supplier Detail Page**
+  - [ ] Company information
+  - [ ] Contact person details
+  - [ ] Statistics (POs, amounts)
+  - [ ] Payment terms
+  - [ ] Product list
+
+- [ ] **Supplier Form**
+  - [ ] Multi-section form
+  - [ ] Bank account details
+  - [ ] Payment terms selector
+  - [ ] Product assignment
+
+##### B. Purchase Orders (3-4 weeks)
+- [ ] **PO Creation Wizard**
+  - [ ] Step 1: Supplier selection
+  - [ ] Step 2: Product selection with quantities
+  - [ ] Step 3: Pricing and totals
+  - [ ] Step 4: Review and submit
+
+- [ ] **PO List Page**
+  - [ ] PO table with status badges
+  - [ ] Filter by status, supplier, date
+  - [ ] Quick actions
+
+- [ ] **PO Detail Page**
+  - [ ] PO header information
+  - [ ] Items table
+  - [ ] Status timeline
+  - [ ] Payment tracking
+  - [ ] Actions (approve, receive, cancel)
+
+- [ ] **PO Approval Interface**
+  - [ ] Approval workflow
+  - [ ] Comments/notes
+  - [ ] Approval history
+
+- [ ] **Receiving Interface**
+  - [ ] Item receiving form
+  - [ ] Partial receiving support
+  - [ ] Inventory update confirmation
+
+- [ ] **API Integration**
+  - [ ] Create `supplierService.js`
+  - [ ] Create `purchaseOrderService.js`
+  - [ ] Workflow management
+
+**Backend Dependencies**: Supplier & PO API endpoints
+
+---
+
+### Phase 6: Business Intelligence 🟡 (4-6 weeks)
+
+#### Frontend Tasks
+- [ ] **Reports Dashboard**
+  - [ ] Report type cards
+  - [ ] Quick stats
+  - [ ] Recent reports list
+
+- [ ] **Report Generation Interface**
+  - [ ] Report type selector
+  - [ ] Date range picker
+  - [ ] Filter options
+  - [ ] Generate button
+
+- [ ] **Sales Reports**
+  - [ ] Line charts (daily/weekly/monthly)
+  - [ ] Category breakdown (pie chart)
+  - [ ] Top products table
+  - [ ] Export functionality
+
+- [ ] **Revenue Reports**
+  - [ ] Revenue trends
+  - [ ] Revenue by category
+  - [ ] Comparison charts
+
+- [ ] **Inventory Reports**
+  - [ ] Current stock levels
+  - [ ] Movement analysis
+  - [ ] Fast/slow movers
+
+- [ ] **Customer Analytics**
+  - [ ] Customer growth chart
+  - [ ] Top customers table
+  - [ ] Customer lifetime value
+  - [ ] Retention metrics
+
+- [ ] **Export Functionality**
+  - [ ] PDF generation
+  - [ ] Excel export
+  - [ ] CSV download
+  - [ ] Print view
+
+- [ ] **API Integration**
+  - [ ] Create `reportService.js`
+  - [ ] Chart data processing
+  - [ ] Export handling
+
+**Backend Dependencies**: Reports API endpoints
+
+---
+
+### Phase 7: Advanced Features 🔮 (Future)
+- [ ] **Real-time Notifications**
+  - [ ] WebSocket integration
+  - [ ] Push notifications
+  - [ ] Toast notifications
+
+- [ ] **Advanced Search**
+  - [ ] Global search
+  - [ ] Search across all entities
+  - [ ] Smart suggestions
+
+- [ ] **Bulk Operations**
+  - [ ] Bulk product import/export
+  - [ ] Bulk category assignment
+  - [ ] Bulk status updates
+
+- [ ] **Multi-language Support**
+  - [ ] i18n integration
+  - [ ] Language switcher
+  - [ ] Translations
+
+- [ ] **Dark Mode**
+  - [ ] Theme switcher
+  - [ ] Dark color scheme
+  - [ ] Persistent preference
+
+- [ ] **Mobile Responsive Improvements**
+  - [ ] Mobile-optimized layouts
+  - [ ] Touch-friendly controls
+  - [ ] Mobile navigation
+
+---
+
+### Overall Timeline
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Q4 2024        │  Q1 2025        │  Q2 2025        │  Q3 2025 │
+├─────────────────┼─────────────────┼─────────────────┼──────────┤
+│ Phase 1 ✅      │ Phase 2 🟡      │ Phase 4 🟡      │ Phase 6 🟡│
+│ Core Features   │ CRM             │ Payments        │ Reports   │
+│                 │ Phase 3 🟡      │ Phase 5 🟡      │ Phase 7 🔮│
+│                 │ Inventory       │ Procurement     │ Advanced  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Current Focus**: Phase 2 (Customer Management) + Phase 3 (Inventory)
+
+---
+
 ## 🎯 Backend Team TODO List
 
-### High Priority
+### ✅ Completed
+- [x] User authentication (JWT)
+- [x] Product CRUD with filters
+- [x] Category management
+- [x] Order processing
+- [x] Database models for all 10 entities
 
-- [ ] **Database Schema Design**
-  - Products table with all fields from data model
-  - Categories table
-  - Product images table (1-to-many)
-  - Orders table
-  - Order items table
-  - Users/Customers table
+### 🔥 High Priority (Phase 2-3)
 
-- [ ] **API Endpoints Implementation**
-  - [ ] `GET /api/products` - Product listing with pagination & filters
-  - [ ] `GET /api/products/:id` - Product detail
-  - [ ] `GET /api/categories` - Category list
-  - [ ] `POST /api/products` - Create product (admin)
-  - [ ] `PUT /api/products/:id` - Update product (admin)
-  - [ ] `DELETE /api/products/:id` - Delete product (admin)
+#### Customer Management
+- [ ] **Customer CRUD Controllers**
+  - [ ] GET `/api/customers` - List with filters
+  - [ ] GET `/api/customers/:id` - Detail view
+  - [ ] GET `/api/customers/:id/orders` - Order history
+  - [ ] GET `/api/customers/:id/stats` - Statistics
+  - [ ] POST `/api/customers` - Create customer
+  - [ ] PUT `/api/customers/:id` - Update customer
+  - [ ] DELETE `/api/customers/:id` - Soft delete
+  - [ ] POST `/api/customers/:id/loyalty` - Loyalty points
 
-- [ ] **Authentication & Authorization**
-  - [ ] JWT token implementation
-  - [ ] Role-based access control (Admin/User)
-  - [ ] Protected routes
+- [ ] **Business Logic**
+  - [ ] Auto-generate customer codes (CUST2025000001)
+  - [ ] Update statistics on order creation
+  - [ ] Loyalty points calculation
+  - [ ] Customer segmentation
 
-### Medium Priority
+#### Inventory Management
+- [ ] **Inventory Controllers**
+  - [ ] GET `/api/inventory` - List all
+  - [ ] GET `/api/inventory/:productId` - Product inventory
+  - [ ] GET `/api/inventory/low-stock` - Alert items
+  - [ ] GET `/api/inventory/:productId/movements` - History
+  - [ ] POST `/api/inventory/adjust` - Manual adjustment
+  - [ ] POST `/api/inventory/reserve` - Reserve stock
+  - [ ] POST `/api/inventory/release` - Release stock
 
-- [ ] **Image Upload Service**
-  - [ ] File upload endpoint
-  - [ ] Image optimization (resize, compress)
-  - [ ] CDN integration
+- [ ] **Business Logic**
+  - [ ] Auto-calculate available quantity
+  - [ ] Movement audit trail
+  - [ ] Low stock alerts
+  - [ ] Integration with orders (auto-reserve)
+  - [ ] Integration with POs (auto-increase)
 
-- [ ] **Shopping Cart API**
-  - [ ] Cart operations (add, update, remove)
-  - [ ] Session management
-  - [ ] Cart persistence
+### 📦 Medium Priority (Phase 4-5)
 
-- [ ] **Order Management**
-  - [ ] Order creation
-  - [ ] Order status updates
-  - [ ] Order history
+#### Payment Processing
+- [ ] Payment CRUD controllers
+- [ ] Refund workflow
+- [ ] Payment-order linking
+- [ ] Payment statistics
 
-### Low Priority
+#### Procurement
+- [ ] Supplier CRUD controllers
+- [ ] Purchase Order CRUD
+- [ ] PO approval workflow
+- [ ] Receiving process
+- [ ] PO-payment linking
 
-- [ ] **Reviews & Ratings**
-- [ ] **Search Functionality**
-- [ ] **Inventory Management**
-- [ ] **Analytics Dashboard Data**
+### 📊 Low Priority (Phase 6)
+
+#### Reports & Analytics
+- [ ] Report generation engine
+- [ ] Sales reports
+- [ ] Inventory reports
+- [ ] Revenue reports
+- [ ] Customer analytics
+- [ ] Export functionality (PDF, Excel, CSV)
 
 ---
 

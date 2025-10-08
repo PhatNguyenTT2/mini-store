@@ -179,7 +179,7 @@ export const FilterProduct = ({ onFilterChange, currentFilters = {} }) => {
                     }`}
                 >
                   <div className="flex items-center gap-2">
-                    {category.image ? (
+                    {/* {category.image ? (
                       <img
                         src={category.image}
                         alt={category.name}
@@ -192,7 +192,7 @@ export const FilterProduct = ({ onFilterChange, currentFilters = {} }) => {
                       <div className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded">
                         <span className="text-xs">📦</span>
                       </div>
-                    )}
+                    )} */}
                     <span className="text-xs text-gray-800">{category.name}</span>
                   </div>
                   <div className="bg-emerald-200 rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5">

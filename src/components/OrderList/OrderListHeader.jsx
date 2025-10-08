@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 
-export const OrderListHeader = () => {
-  const [sortBy, setSortBy] = useState('Sort by');
-  const [itemsPerPage, setItemsPerPage] = useState('10');
-  const [searchQuery, setSearchQuery] = useState('');
-
+export const OrderListHeader = ({
+  sortBy = 'newest',
+  onSortChange,
+  itemsPerPage = 20,
+  onItemsPerPageChange,
+  searchQuery = '',
+  onSearchChange,
+  onSearch
+}) => {
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between gap-3">
@@ -21,14 +25,13 @@ export const OrderListHeader = () => {
           <div className="relative w-[120px]">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => onSortChange && onSortChange(e.target.value)}
               className="w-full h-[36px] bg-white border border-[#ced4da] rounded-lg px-3 py-2 text-[12px] font-['Poppins',sans-serif] text-[#212529] appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
-              <option value="Sort by">Sort by</option>
-              <option value="date">Date</option>
-              <option value="status">Status</option>
-              <option value="customer">Customer</option>
-              <option value="total">Total</option>
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="total_high">Total (High)</option>
+              <option value="total_low">Total (Low)</option>
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,7 +44,7 @@ export const OrderListHeader = () => {
           <div className="relative w-[80px]">
             <select
               value={itemsPerPage}
-              onChange={(e) => setItemsPerPage(e.target.value)}
+              onChange={(e) => onItemsPerPageChange && onItemsPerPageChange(parseInt(e.target.value))}
               className="w-full h-[36px] bg-white border border-[#ced4da] rounded-lg px-3 py-2 text-[12px] font-['Poppins',sans-serif] text-[#212529] appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
             >
               <option value="10">10</option>
@@ -63,15 +66,17 @@ export const OrderListHeader = () => {
                 type="text"
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && onSearch) {
+                    onSearch(searchQuery);
+                  }
+                }}
                 className="flex-1 bg-white border border-[#ced4da] rounded-l-lg px-3 py-2 text-[12px] font-['Poppins',sans-serif] text-gray-900 placeholder:text-[#6c757d] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
               />
               <button
                 className="w-[40px] bg-white border border-[#ced4da] border-l-0 rounded-r-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
-                onClick={() => {
-                  // Handle search
-                  console.log('Search:', searchQuery);
-                }}
+                onClick={() => onSearch && onSearch(searchQuery)}
               >
                 <svg
                   width="14"

@@ -18,7 +18,13 @@ import {
   DollarSign,
   Users,
   User2Icon,
-  LogOut
+  LogOut,
+  CarTaxiFront,
+  CassetteTapeIcon,
+  BookAIcon,
+  PanelTopInactiveIcon,
+  LucideStore,
+  LucideAArrowDown
 } from 'lucide-react';
 import authService from '../../../../services/authService';
 
@@ -56,10 +62,11 @@ export const NavigationMenuSection = () => {
 
   const menuItems = [
     {
-      category: 'E-Commerce',
+      category: 'Management',
       items: [
         { name: 'Dashboard', icon: LayoutGrid, href: '/dashboard' },
         { name: 'Orders', icon: ShoppingBag, arrow: false, href: '/orders' },
+        { name: 'Category', icon: BookAIcon },
         {
           name: 'Products',
           icon: Package2,
@@ -70,9 +77,10 @@ export const NavigationMenuSection = () => {
             { name: 'Checkout', href: '/products/checkout' },
           ]
         },
-        { name: 'Buyer', icon: User2Icon, arrow: true },
+        // { name: 'Buyer', icon: User2Icon, arrow: true },
         { name: 'Customers', icon: User },
-        // { name: 'Invoices', icon: ClipboardList, arrow: true },
+        { name: 'Stock', icon: LucideStore, arrow: true },
+        { name: 'Invoices', icon: ClipboardList, arrow: true },
       ],
     },
     // {
@@ -84,14 +92,14 @@ export const NavigationMenuSection = () => {
     //   ],
     // },
     {
-      category: 'Pages',
+      category: 'Admin',
       items: [
         { name: 'Profile', icon: UserCircle, arrow: true },
         { name: 'Users', icon: Users, arrow: true },
-        { name: 'Authentication', icon: Shield, arrow: true },
-        { name: 'Error Pages', icon: AlertTriangle, arrow: true },
+        // { name: 'Authentication', icon: Shield, arrow: true },
+        // { name: 'Error Pages', icon: AlertTriangle, arrow: true },
         { name: 'Settings', icon: Settings },
-        { name: 'Pricing Table', icon: DollarSign, new: true },
+        // { name: 'Pricing Table', icon: DollarSign, new: true },
       ],
     },
   ];
