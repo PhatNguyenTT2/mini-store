@@ -78,8 +78,8 @@ export const NavigationMenuSection = () => {
           ]
         },
         // { name: 'Buyer', icon: User2Icon, arrow: true },
-        { name: 'Customers', icon: User },
-        { name: 'Supplier', icon: User2Icon },
+        { name: 'Customers', icon: User, href: '/customers' },
+        { name: 'Suppliers', icon: User2Icon, href: '/suppliers' },
         { name: 'Inventory', icon: LucideStore, arrow: true },
         { name: 'Payment', icon: DollarSign, arrow: true },
         { name: 'Invoices', icon: ClipboardList, arrow: true },
@@ -98,8 +98,8 @@ export const NavigationMenuSection = () => {
       category: 'Admin',
       items: [
         { name: 'Profile', icon: UserCircle, arrow: true },
-        { name: 'Users', icon: Users, arrow: true },
-        // { name: 'Authentication', icon: Shield, arrow: true },
+        { name: 'Users', icon: Users, href: '/users' },
+        { name: 'Authentication', icon: Shield, arrow: true },
         // { name: 'Error Pages', icon: AlertTriangle, arrow: true },
         { name: 'Settings', icon: Settings },
         // { name: 'Pricing Table', icon: DollarSign, new: true },

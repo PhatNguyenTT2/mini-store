@@ -1,6 +1,5 @@
 import React from 'react';
 import { SearchNotificationSection } from './sections/SearchNotificationSection';
-import { ActionSection } from './sections/ActionSection';
 
 export const Header = () => {
   return (
