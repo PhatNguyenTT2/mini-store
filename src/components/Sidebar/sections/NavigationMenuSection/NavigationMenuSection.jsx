@@ -24,7 +24,8 @@ import {
   BookAIcon,
   PanelTopInactiveIcon,
   LucideStore,
-  LucideAArrowDown
+  LucideAArrowDown,
+  ReceiptEuro
 } from 'lucide-react';
 import authService from '../../../../services/authService';
 
@@ -74,13 +75,15 @@ export const NavigationMenuSection = () => {
           submenu: [
             { name: 'List', href: '/products/list' },
             { name: 'View', href: '/products/view' },
-            { name: 'Checkout', href: '/products/checkout' },
           ]
         },
         // { name: 'Buyer', icon: User2Icon, arrow: true },
         { name: 'Customers', icon: User },
-        { name: 'Stock', icon: LucideStore, arrow: true },
+        { name: 'Supplier', icon: User2Icon },
+        { name: 'Inventory', icon: LucideStore, arrow: true },
+        { name: 'Payment', icon: DollarSign, arrow: true },
         { name: 'Invoices', icon: ClipboardList, arrow: true },
+        { name: 'Reports', icon: ReceiptEuro, arrow: true },
       ],
     },
     // {

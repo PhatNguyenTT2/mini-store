@@ -1,2 +1,2 @@
-export { default as ProductList } from './ProductList';
-export { default as ProductListHeader } from './ProductListHeader';
+export { ProductList } from './ProductList';
+export { ProductListHeader } from './ProductListHeader';

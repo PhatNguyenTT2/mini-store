@@ -1,158 +1,182 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const ProductListHeader = ({
-  itemsPerPage,
-  setItemsPerPage,
-  searchQuery,
-  setSearchQuery,
+export const ProductListHeader = ({
+  itemsPerPage = 20,
+  onItemsPerPageChange,
+  searchQuery = '',
+  onSearchChange,
+  onSearch,
+  onAdd,
   onExport,
-  onPrint,
-  onAdd
+  onPrint
 }) => {
   const [showActionsDropdown, setShowActionsDropdown] = useState(false);
-  const [showItemsDropdown, setShowItemsDropdown] = useState(false);
-  const actionsDropdownRef = useRef(null);
-  const itemsDropdownRef = useRef(null);
+  const dropdownRef = useRef(null);
 
-  // Close dropdowns when clicking outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (actionsDropdownRef.current && !actionsDropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowActionsDropdown(false);
-      }
-      if (itemsDropdownRef.current && !itemsDropdownRef.current.contains(event.target)) {
-        setShowItemsDropdown(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (showActionsDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showActionsDropdown]);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
       <div className="flex items-center justify-between gap-3">
-        {/* Left Side - Actions Dropdown */}
-        <div className="relative" ref={actionsDropdownRef}>
+        {/* Title */}
+        <div className="flex items-center">
+          <h2 className="text-[13px] font-normal font-['Poppins',sans-serif] text-black leading-[20px] whitespace-nowrap">
+            All Products
+          </h2>
+        </div>
+
+        {/* Controls Container */}
+        <div className="flex items-center gap-2 flex-1 ml-4">
+          {/* Items Per Page Dropdown */}
+          <div className="relative w-[80px]">
+            <select
+              value={itemsPerPage}
+              onChange={(e) => onItemsPerPageChange && onItemsPerPageChange(parseInt(e.target.value))}
+              className="w-full h-[36px] bg-white border border-[#ced4da] rounded-lg px-3 py-2 text-[12px] font-['Poppins',sans-serif] text-[#212529] appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 4.5L6 7.5L9 4.5" stroke="#212529" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Search Input */}
+          <div className="flex-1 max-w-[300px]">
+            <div className="flex h-[36px] gap-1">
+              <input
+                type="text"
+                placeholder="Search by SKU or Name..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && onSearch) {
+                    onSearch(searchQuery);
+                  }
+                }}
+                className="flex-1 bg-white border border-[#ced4da] rounded-lg px-3 py-2 text-[12px] font-['Poppins',sans-serif] text-gray-900 placeholder:text-[#6c757d] focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              />
+              <button
+                className="w-[40px] bg-white border border-[#ced4da] rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors flex-shrink-0"
+                onClick={() => onSearch && onSearch(searchQuery)}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.5 11.5C9.26142 11.5 11.5 9.26142 11.5 6.5C11.5 3.73858 9.26142 1.5 6.5 1.5C3.73858 1.5 1.5 3.73858 1.5 6.5C1.5 9.26142 3.73858 11.5 6.5 11.5Z"
+                    stroke="#6B7280"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12.5 12.5L10.5 10.5"
+                    stroke="#6B7280"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions Button with Dropdown */}
+        <div className="relative ml-auto" ref={dropdownRef}>
           <button
             onClick={() => setShowActionsDropdown(!showActionsDropdown)}
-            className="h-[36px] px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-['Poppins',sans-serif] text-[13px] font-medium transition-colors flex items-center gap-2"
+            className="h-[36px] px-4 bg-emerald-600 hover:bg-emerald-700 border border-emerald-600 rounded-lg text-white text-[12px] font-['Poppins',sans-serif] leading-[20px] flex items-center justify-center gap-1.5 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 whitespace-nowrap"
           >
-            Actions
+            <span>Actions</span>
             <svg
-              className={`w-4 h-4 transition-transform ${showActionsDropdown ? 'rotate-180' : ''}`}
+              width="8"
+              height="5"
+              viewBox="0 0 8 5"
               fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+              className={`transition-transform ${showActionsDropdown ? 'rotate-180' : ''}`}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
 
+          {/* Dropdown Menu */}
           {showActionsDropdown && (
-            <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
               <button
                 onClick={() => {
-                  onAdd();
+                  onAdd && onAdd();
                   setShowActionsDropdown(false);
                 }}
-                className="w-full px-4 py-2 text-left text-[13px] font-['Poppins',sans-serif] text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center gap-2"
+                className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 transition-colors flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 3.33337V12.6667M12.6667 8H3.33333" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Add Product
               </button>
+
+              <div className="border-t border-gray-200 my-1"></div>
+
               <button
                 onClick={() => {
-                  onExport();
+                  onExport && onExport();
                   setShowActionsDropdown(false);
                 }}
-                className="w-full px-4 py-2 text-left text-[13px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
+                className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 10V12.6667C14 13.0203 13.8595 13.3594 13.6095 13.6095C13.3594 13.8595 13.0203 14 12.6667 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4.66667 6.66667L8 10L11.3333 6.66667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M8 10V2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Export CSV
               </button>
+
               <button
                 onClick={() => {
-                  onPrint();
+                  onPrint && onPrint();
                   setShowActionsDropdown(false);
                 }}
-                className="w-full px-4 py-2 text-left text-[13px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
+                className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 6V2H12V6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4 12H3.33333C2.97971 12 2.64057 11.8595 2.39052 11.6095C2.14048 11.3594 2 11.0203 2 10.6667V8C2 7.64638 2.14048 7.30724 2.39052 7.05719C2.64057 6.80714 2.97971 6.66667 3.33333 6.66667H12.6667C13.0203 6.66667 13.3594 6.80714 13.6095 7.05719C13.8595 7.30724 14 7.64638 14 8V10.6667C14 11.0203 13.8595 11.3594 13.6095 11.6095C13.3594 11.8595 13.0203 12 12.6667 12H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M12 10H4V14H12V10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Print
               </button>
             </div>
           )}
         </div>
-
-        {/* Middle - Search Bar */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search by SKU or Name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-[36px] pl-10 pr-4 border border-gray-300 rounded-lg font-['Poppins',sans-serif] text-[13px] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Right Side - Items Per Page */}
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] font-['Poppins',sans-serif] text-gray-600">Show</span>
-          <div className="relative" ref={itemsDropdownRef}>
-            <button
-              onClick={() => setShowItemsDropdown(!showItemsDropdown)}
-              className="h-[36px] px-4 border border-gray-300 rounded-lg font-['Poppins',sans-serif] text-[13px] text-gray-700 hover:border-gray-400 transition-colors flex items-center gap-2 min-w-[80px] justify-between"
-            >
-              {itemsPerPage}
-              <svg
-                className={`w-4 h-4 transition-transform ${showItemsDropdown ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {showItemsDropdown && (
-              <div className="absolute right-0 mt-2 w-20 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
-                {[10, 20, 50, 100].map((value) => (
-                  <button
-                    key={value}
-                    onClick={() => {
-                      setItemsPerPage(value);
-                      setShowItemsDropdown(false);
-                    }}
-                    className={`w-full px-4 py-2 text-[13px] font-['Poppins',sans-serif] text-left hover:bg-gray-50 transition-colors ${itemsPerPage === value ? 'text-emerald-600 bg-emerald-50' : 'text-gray-700'
-                      }`}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
 };
-
-export default ProductListHeader;

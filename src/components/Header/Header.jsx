@@ -11,7 +11,6 @@ export const Header = () => {
 
       <div className="flex items-center space-x-4">
         <SearchNotificationSection />
-        <ActionSection />
       </div>
     </header>
   );

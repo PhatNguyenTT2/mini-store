@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, onSort, sortField, sortOrder }) => {
-  const [activeDropdown, setActiveDropdown] = useState(null); // Format: 'order-{orderId}' hoặc 'payment-{orderId}'
+  const [activeDropdown, setActiveDropdown] = useState(null); // Format: 'order-{orderId}', 'payment-{orderId}', 'action-{orderId}'
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [pendingChanges, setPendingChanges] = useState({}); // Track pending changes
   const dropdownRef = useRef(null);
 
@@ -38,10 +39,31 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
   };
 
   // Toggle dropdown
-  const toggleDropdown = (dropdownId) => {
+  const toggleDropdown = (dropdownId, event) => {
     console.log('Toggle dropdown:', dropdownId);
     console.log('Current activeDropdown:', activeDropdown);
-    setActiveDropdown(activeDropdown === dropdownId ? null : dropdownId);
+
+    if (activeDropdown === dropdownId) {
+      setActiveDropdown(null);
+    } else {
+      const buttonRect = event.currentTarget.getBoundingClientRect();
+
+      // Determine position based on dropdown type
+      let leftPosition;
+      if (dropdownId.startsWith('order-') || dropdownId.startsWith('payment-')) {
+        // For Order Status and Payment Status: show dropdown to the right of button
+        leftPosition = buttonRect.left;
+      } else {
+        // For Actions: show dropdown aligned to the right (as before)
+        leftPosition = buttonRect.right - 160; // 160px is dropdown width
+      }
+
+      setDropdownPosition({
+        top: buttonRect.bottom + 4,
+        left: leftPosition
+      });
+      setActiveDropdown(dropdownId);
+    }
   };
 
   // Handle order status change
@@ -118,9 +140,9 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Scrollable Container */}
-      <div className="overflow-x-auto overflow-y-visible">
+    <div className="bg-white rounded-lg shadow-sm">
+      {/* Scrollable Container - overflow-x-auto allows horizontal scroll */}
+      <div className="overflow-x-auto rounded-lg">
         <div className="min-w-[1200px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
@@ -183,7 +205,7 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
             </div>
 
             {/* Actions Column */}
-            <div className="w-[140px] px-3 flex items-center justify-center flex-shrink-0">
+            <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
                 Actions
               </p>
@@ -231,139 +253,48 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
                   </div>
 
                   {/* Order Status Badge with Dropdown */}
-                  <div className="w-[160px] px-3 flex items-center flex-shrink-0 relative">
-                    <div ref={activeDropdown === orderDropdownId ? dropdownRef : null}>
-                      <button
-                        onClick={() => toggleDropdown(orderDropdownId)}
-                        className={`${getOrderStatusStyles(order.status)} px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity`}
-                      >
-                        <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
-                          {order.status}
-                        </span>
-                        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-
-                      {/* Dropdown Menu cho Order Status - fixed position để không bị cắt */}
-                      {activeDropdown === orderDropdownId && (
-                        <div
-                          className="fixed bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999] min-w-[140px]"
-                          style={{
-                            top: `${dropdownRef.current?.getBoundingClientRect().bottom + 4}px`,
-                            left: `${dropdownRef.current?.getBoundingClientRect().left}px`
-                          }}
-                        >
-                          {orderStatusOptions.map((option) => (
-                            <button
-                              key={option.value}
-                              onClick={() => handleOrderStatusChange(order.id, option.value)}
-                              className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
-                            >
-                              <span className={`${option.color} w-2 h-2 rounded-full`}></span>
-                              <span className="text-[12px] font-['Poppins',sans-serif] text-[#212529] capitalize">
-                                {option.label}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                  <div className="w-[160px] px-3 flex items-center flex-shrink-0">
+                    <button
+                      onClick={(e) => toggleDropdown(orderDropdownId, e)}
+                      className={`${getOrderStatusStyles(order.status)} px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity`}
+                    >
+                      <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
+                        {order.status}
+                      </span>
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
                   </div>
 
                   {/* Payment Status Badge with Dropdown */}
-                  <div className="w-[160px] px-3 flex items-center flex-shrink-0 relative">
-                    <div ref={activeDropdown === paymentDropdownId ? dropdownRef : null}>
-                      <button
-                        onClick={() => toggleDropdown(paymentDropdownId)}
-                        className={`${getPaymentStatusStyles(order.paymentStatus)} px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity`}
-                      >
-                        <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
-                          {order.paymentStatus || 'pending'}
-                        </span>
-                        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-
-                      {/* Dropdown Menu cho Payment Status - fixed position để không bị cắt */}
-                      {activeDropdown === paymentDropdownId && (
-                        <div
-                          className="fixed bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999] min-w-[120px]"
-                          style={{
-                            top: `${dropdownRef.current?.getBoundingClientRect().bottom + 4}px`,
-                            left: `${dropdownRef.current?.getBoundingClientRect().left}px`
-                          }}
-                        >
-                          {paymentStatusOptions.map((option) => (
-                            <button
-                              key={option.value}
-                              onClick={() => handlePaymentStatusChange(order.id, option.value)}
-                              className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
-                            >
-                              <span className={`${option.color} w-2 h-2 rounded-full`}></span>
-                              <span className="text-[12px] font-['Poppins',sans-serif] text-[#212529] capitalize">
-                                {option.label}
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                  <div className="w-[160px] px-3 flex items-center flex-shrink-0">
+                    <button
+                      onClick={(e) => toggleDropdown(paymentDropdownId, e)}
+                      className={`${getPaymentStatusStyles(order.paymentStatus)} px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity`}
+                    >
+                      <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
+                        {order.paymentStatus || 'pending'}
+                      </span>
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
                   </div>
 
                   {/* Actions */}
-                  <div className="w-[140px] px-3 flex items-center justify-center flex-shrink-0 relative">
-                    <div ref={activeDropdown === `action-${order.id}` ? dropdownRef : null}>
-                      <button
-                        onClick={() => toggleDropdown(`action-${order.id}`)}
-                        className="p-2 hover:bg-gray-200 rounded-full transition-colors"
-                        title="Actions"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <circle cx="3" cy="8" r="1.5" fill="#6B7280" />
-                          <circle cx="8" cy="8" r="1.5" fill="#6B7280" />
-                          <circle cx="13" cy="8" r="1.5" fill="#6B7280" />
-                        </svg>
-                      </button>
-
-                      {/* Dropdown Menu for Actions */}
-                      {activeDropdown === `action-${order.id}` && (
-                        <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
-                          <button
-                            onClick={() => {
-                              console.log('View order:', order.id);
-                              setActiveDropdown(null);
-                            }}
-                            className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 8C1 8 3 4 8 4C13 4 15 8 15 8C15 8 13 12 8 12C3 12 1 8 1 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            View
-                          </button>
-
-                          <div className="border-t border-gray-200 my-1"></div>
-
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Are you sure you want to delete order ${order.orderNumber}?`)) {
-                                console.log('Delete order:', order.id);
-                              }
-                              setActiveDropdown(null);
-                            }}
-                            className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                  <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
+                    <button
+                      onClick={(e) => toggleDropdown(`action-${order.id}`, e)}
+                      className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                      title="Actions"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="3" cy="8" r="1.5" fill="#6B7280" />
+                        <circle cx="8" cy="8" r="1.5" fill="#6B7280" />
+                        <circle cx="13" cy="8" r="1.5" fill="#6B7280" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               );
@@ -380,6 +311,124 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
           )}
         </div>
       </div>
+
+      {/* Fixed Position Dropdown Menus - Rendered outside table container */}
+      {activeDropdown && (() => {
+        // Find the order based on activeDropdown ID
+        const order = orders.find(o =>
+          activeDropdown === `order-${o.id}` ||
+          activeDropdown === `payment-${o.id}` ||
+          activeDropdown === `action-${o.id}`
+        );
+
+        if (!order) return null;
+
+        // Determine dropdown type
+        const isOrderStatus = activeDropdown === `order-${order.id}`;
+        const isPaymentStatus = activeDropdown === `payment-${order.id}`;
+        const isAction = activeDropdown === `action-${order.id}`;
+
+        // Render Order Status Dropdown
+        if (isOrderStatus) {
+          return (
+            <div
+              ref={dropdownRef}
+              className="fixed min-w-[140px] bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`
+              }}
+            >
+              {orderStatusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleOrderStatusChange(order.id, option.value)}
+                  className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
+                >
+                  <span className={`${option.color} w-2 h-2 rounded-full`}></span>
+                  <span className="text-[12px] font-['Poppins',sans-serif] text-[#212529] capitalize">
+                    {option.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          );
+        }
+
+        // Render Payment Status Dropdown
+        if (isPaymentStatus) {
+          return (
+            <div
+              ref={dropdownRef}
+              className="fixed min-w-[120px] bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`
+              }}
+            >
+              {paymentStatusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handlePaymentStatusChange(order.id, option.value)}
+                  className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
+                >
+                  <span className={`${option.color} w-2 h-2 rounded-full`}></span>
+                  <span className="text-[12px] font-['Poppins',sans-serif] text-[#212529] capitalize">
+                    {option.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          );
+        }
+
+        // Render Actions Dropdown
+        if (isAction) {
+          return (
+            <div
+              ref={dropdownRef}
+              className="fixed w-40 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`
+              }}
+            >
+              <button
+                onClick={() => {
+                  console.log('Edit order:', order.id);
+                  setActiveDropdown(null);
+                }}
+                className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.33301 14.6667L2.66634 10.6667L11.333 2.00004Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Edit
+              </button>
+
+              <div className="border-t border-gray-200 my-1"></div>
+
+              <button
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete order ${order.orderNumber}?`)) {
+                    console.log('Delete order:', order.id);
+                  }
+                  setActiveDropdown(null);
+                }}
+                className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Delete
+              </button>
+            </div>
+          );
+        }
+
+        return null;
+      })()}
     </div>
   );
 };

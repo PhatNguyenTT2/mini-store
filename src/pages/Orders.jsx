@@ -167,11 +167,10 @@ const Orders = () => {
     setOrders(sorted);
   };
 
-  // Handle apply changes (from Actions dropdown)
-  const handleApplyChanges = async () => {
-    console.log('Applying all pending changes...');
-    await fetchOrders();
-    alert('Changes applied successfully!');
+  // Handle add order (from Actions dropdown)
+  const handleAddOrder = () => {
+    console.log('Add new order clicked');
+    alert('Add Order functionality will be implemented soon!');
   };
 
   return (
@@ -187,7 +186,7 @@ const Orders = () => {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
-          onApplyChanges={handleApplyChanges}
+          onAddOrder={handleAddOrder}
         />
 
         {/* Loading State */}
@@ -213,45 +212,130 @@ const Orders = () => {
 
         {/* Order List Table */}
         {!loading && !error && (
-          <OrderList
-            orders={orders}
-            onStatusChange={handleStatusChange}
-            onPaymentStatusChange={handlePaymentStatusChange}
-            onSort={handleColumnSort}
-            sortField={sortField}
-            sortOrder={sortOrder}
-          />
-        )}
+          <>
+            <OrderList
+              orders={orders}
+              onStatusChange={handleStatusChange}
+              onPaymentStatusChange={handlePaymentStatusChange}
+              onSort={handleColumnSort}
+              sortField={sortField}
+              sortOrder={sortOrder}
+            />
 
-        {/* Pagination Info */}
-        {!loading && !error && orders.length > 0 && (
-          <div className="flex justify-between items-center px-4 py-3 bg-white rounded-lg shadow-sm">
-            <p className="text-sm text-gray-600">
-              Showing <span className="font-medium">{orders.length}</span> of{' '}
-              <span className="font-medium">{pagination.total}</span> orders
-            </p>
-            <div className="flex gap-2">
-              {pagination.has_prev && (
-                <button
-                  onClick={() => setFilters({ ...filters, page: pagination.current_page - 1 })}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-              )}
-              <span className="px-4 py-2 text-sm text-gray-600">
-                Page {pagination.current_page} of {pagination.total_pages}
-              </span>
-              {pagination.has_next && (
-                <button
-                  onClick={() => setFilters({ ...filters, page: pagination.current_page + 1 })}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              )}
-            </div>
-          </div>
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+              <div className="flex items-center justify-center mt-6">
+                <div className="flex items-center gap-2">
+                  {/* Previous button */}
+                  <button
+                    onClick={() => setFilters({ ...filters, page: pagination.current_page - 1 })}
+                    disabled={!pagination.has_prev}
+                    className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${!pagination.has_prev
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      }`}
+                  >
+                    ‹ Previous
+                  </button>
+
+                  {/* Page numbers */}
+                  {(() => {
+                    const maxPagesToShow = 5;
+                    const totalPages = pagination.total_pages;
+                    const currentPage = pagination.current_page;
+
+                    // Calculate start and end page numbers to display
+                    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+                    // Adjust start if we're near the end
+                    if (endPage - startPage < maxPagesToShow - 1) {
+                      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                    }
+
+                    const pages = [];
+
+                    // First page + ellipsis
+                    if (startPage > 1) {
+                      pages.push(
+                        <button
+                          key={1}
+                          onClick={() => setFilters({ ...filters, page: 1 })}
+                          className="px-3 py-2 rounded text-[#3bb77e] hover:bg-[#def9ec] transition-colors text-[12px] font-['Poppins',sans-serif]"
+                        >
+                          1
+                        </button>
+                      );
+                      if (startPage > 2) {
+                        pages.push(
+                          <span key="ellipsis-start" className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        );
+                      }
+                    }
+
+                    // Page numbers
+                    for (let page = startPage; page <= endPage; page++) {
+                      pages.push(
+                        <button
+                          key={page}
+                          onClick={() => setFilters({ ...filters, page })}
+                          className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${currentPage === page
+                            ? 'bg-[#3bb77e] text-white'
+                            : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    }
+
+                    // Ellipsis + last page
+                    if (endPage < totalPages) {
+                      if (endPage < totalPages - 1) {
+                        pages.push(
+                          <span key="ellipsis-end" className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        );
+                      }
+                      pages.push(
+                        <button
+                          key={totalPages}
+                          onClick={() => setFilters({ ...filters, page: totalPages })}
+                          className="px-3 py-2 rounded text-[#3bb77e] hover:bg-[#def9ec] transition-colors text-[12px] font-['Poppins',sans-serif]"
+                        >
+                          {totalPages}
+                        </button>
+                      );
+                    }
+
+                    return pages;
+                  })()}
+
+                  {/* Next button */}
+                  <button
+                    onClick={() => setFilters({ ...filters, page: pagination.current_page + 1 })}
+                    disabled={!pagination.has_next}
+                    className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${!pagination.has_next
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      }`}
+                  >
+                    Next ›
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Results Summary */}
+            {orders.length > 0 && (
+              <div className="text-center text-sm text-gray-600 font-['Poppins',sans-serif] mt-4">
+                Showing {((pagination.current_page - 1) * pagination.per_page) + 1} to {Math.min(pagination.current_page * pagination.per_page, pagination.total)} of {pagination.total} orders
+              </div>
+            )}
+          </>
         )}
       </div>
     </Layout>

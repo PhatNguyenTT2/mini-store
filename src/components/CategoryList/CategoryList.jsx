@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 
 export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, onEdit, onDelete }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef(null);
+  const buttonRefs = useRef({});
   const getSortIcon = (field) => {
     if (sortField !== field) {
       return (
@@ -41,8 +43,17 @@ export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, on
   };
 
   // Toggle dropdown
-  const toggleDropdown = (categoryId) => {
-    setActiveDropdown(activeDropdown === categoryId ? null : categoryId);
+  const toggleDropdown = (categoryId, event) => {
+    if (activeDropdown === categoryId) {
+      setActiveDropdown(null);
+    } else {
+      const buttonRect = event.currentTarget.getBoundingClientRect();
+      setDropdownPosition({
+        top: buttonRect.bottom + 4,
+        left: buttonRect.right - 160 // 160px is dropdown width
+      });
+      setActiveDropdown(categoryId);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -63,9 +74,9 @@ export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, on
   }, [activeDropdown]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Scrollable Container */}
-      <div className="overflow-x-auto overflow-y-visible">
+    <div className="bg-white rounded-lg shadow-sm">
+      {/* Scrollable Container - overflow-x-auto allows horizontal scroll */}
+      <div className="overflow-x-auto rounded-lg">
         <div className="min-w-[1000px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
@@ -183,54 +194,18 @@ export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, on
                   </div>
 
                   {/* Actions */}
-                  <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0 relative">
-                    <div ref={activeDropdown === dropdownId ? dropdownRef : null}>
-                      <button
-                        onClick={() => toggleDropdown(dropdownId)}
-                        className="p-2 hover:bg-gray-200 rounded-full transition-colors"
-                        title="Actions"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <circle cx="3" cy="8" r="1.5" fill="#6B7280" />
-                          <circle cx="8" cy="8" r="1.5" fill="#6B7280" />
-                          <circle cx="13" cy="8" r="1.5" fill="#6B7280" />
-                        </svg>
-                      </button>
-
-                      {/* Dropdown Menu */}
-                      {isDropdownActive && (
-                        <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50">
-                          <button
-                            onClick={() => {
-                              onEdit && onEdit(category);
-                              setActiveDropdown(null);
-                            }}
-                            className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.33301 14.6667L2.66634 10.6667L11.333 2.00004Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            Edit
-                          </button>
-
-                          <div className="border-t border-gray-200 my-1"></div>
-
-                          <button
-                            onClick={() => {
-                              onDelete && onDelete(category);
-                              setActiveDropdown(null);
-                            }}
-                            className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            Delete
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                  <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
+                    <button
+                      onClick={(e) => toggleDropdown(dropdownId, e)}
+                      className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                      title="Actions"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="3" cy="8" r="1.5" fill="#6B7280" />
+                        <circle cx="8" cy="8" r="1.5" fill="#6B7280" />
+                        <circle cx="13" cy="8" r="1.5" fill="#6B7280" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               );
@@ -247,6 +222,56 @@ export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, on
           )}
         </div>
       </div>
+
+      {/* Dropdown Menu - Rendered outside table container */}
+      {activeDropdown && (
+        <div
+          ref={dropdownRef}
+          className="fixed w-40 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`
+          }}
+        >
+          {(() => {
+            const category = categories.find(c => `category-${c.id}` === activeDropdown);
+            if (!category) return null;
+
+            return (
+              <>
+                <button
+                  onClick={() => {
+                    onEdit && onEdit(category);
+                    setActiveDropdown(null);
+                  }}
+                  className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.333 2.00004C11.5081 1.82494 11.716 1.68605 11.9447 1.59129C12.1735 1.49653 12.4187 1.44775 12.6663 1.44775C12.914 1.44775 13.1592 1.49653 13.3879 1.59129C13.6167 1.68605 13.8246 1.82494 13.9997 2.00004C14.1748 2.17513 14.3137 2.383 14.4084 2.61178C14.5032 2.84055 14.552 3.08575 14.552 3.33337C14.552 3.58099 14.5032 3.82619 14.4084 4.05497C14.3137 4.28374 14.1748 4.49161 13.9997 4.66671L5.33301 13.3334L1.33301 14.6667L2.66634 10.6667L11.333 2.00004Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Edit
+                </button>
+
+                <div className="border-t border-gray-200 my-1"></div>
+
+                <button
+                  onClick={() => {
+                    onDelete && onDelete(category);
+                    setActiveDropdown(null);
+                  }}
+                  className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Delete
+                </button>
+              </>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 };

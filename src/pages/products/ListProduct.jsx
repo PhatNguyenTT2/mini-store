@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../../components/Layout';
 import { Breadcrumb } from '../../components/Breadcrumb';
-import ProductList from '../../components/ListProduct/ProductList';
-import ProductListHeader from '../../components/ListProduct/ProductListHeader';
+import { ProductList, ProductListHeader } from '../../components/ListProduct';
+
 import productService from '../../services/productService';
 
 const ListProduct = () => {
@@ -15,21 +15,34 @@ const ListProduct = () => {
   // State management
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
+  const [paginatedProducts, setPaginatedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Filter & sort state
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('sku');
   const [sortOrder, setSortOrder] = useState('asc');
+
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    total: 0,
+    total_pages: 0,
+    current_page: 1,
+    per_page: 10,
+    has_prev: false,
+    has_next: false
+  });
 
   // Fetch products from backend
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await productService.getProducts();
+      // Fetch all products - set per_page to a high number or use backend's max
+      const response = await productService.getProducts({ per_page: 1000 });
 
       // Handle different response structures
       let productData = [];
@@ -39,6 +52,7 @@ const ListProduct = () => {
         productData = response;
       }
 
+      console.log('Fetched products:', productData.length);
       setProducts(productData);
       setFilteredProducts(productData);
     } catch (err) {
@@ -95,16 +109,46 @@ const ListProduct = () => {
       }
     });
 
-    // Apply items per page limit
-    result = result.slice(0, itemsPerPage);
-
     setFilteredProducts(result);
-  }, [products, searchQuery, sortField, sortOrder, itemsPerPage]);
+    // Reset to page 1 when filters change
+    setCurrentPage(1);
+  }, [products, searchQuery, sortField, sortOrder]);
+
+  // Apply pagination to filtered products
+  useEffect(() => {
+    const total = filteredProducts.length;
+    const totalPages = Math.ceil(total / itemsPerPage);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+
+    const paginated = filteredProducts.slice(start, end);
+    setPaginatedProducts(paginated);
+
+    // Update pagination info
+    setPagination({
+      total,
+      total_pages: totalPages,
+      current_page: currentPage,
+      per_page: itemsPerPage,
+      has_prev: currentPage > 1,
+      has_next: currentPage < totalPages
+    });
+  }, [filteredProducts, currentPage, itemsPerPage]);
 
   // Handler functions
-  const handleSort = (field, order) => {
-    setSortField(field);
-    setSortOrder(order);
+  const handleSort = (field) => {
+    // Toggle sort order if clicking same field
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleEdit = (product) => {
@@ -152,9 +196,10 @@ const ListProduct = () => {
         {/* Header */}
         <ProductListHeader
           itemsPerPage={itemsPerPage}
-          setItemsPerPage={setItemsPerPage}
+          onItemsPerPageChange={setItemsPerPage}
           searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          onSearchChange={setSearchQuery}
+          onSearch={(query) => setSearchQuery(query)}
           onExport={handleExport}
           onPrint={handlePrint}
           onAdd={handleAdd}
@@ -240,21 +285,128 @@ const ListProduct = () => {
 
         {/* Products List */}
         {!isLoading && !error && filteredProducts.length > 0 && (
-          <ProductList
-            products={filteredProducts}
-            onSort={handleSort}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        )}
+          <>
+            <ProductList
+              products={paginatedProducts}
+              onSort={handleSort}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
 
-        {/* Results Summary */}
-        {!isLoading && !error && filteredProducts.length > 0 && (
-          <div className="text-center text-sm text-gray-600 font-['Poppins',sans-serif]">
-            Showing {filteredProducts.length} of {products.length} products
-          </div>
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+              <div className="flex items-center justify-center mt-6">
+                <div className="flex items-center gap-2">
+                  {/* Previous button */}
+                  <button
+                    onClick={() => handlePageChange(pagination.current_page - 1)}
+                    disabled={!pagination.has_prev}
+                    className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${!pagination.has_prev
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      }`}
+                  >
+                    ‹ Previous
+                  </button>
+
+                  {/* Page numbers */}
+                  {(() => {
+                    const maxPagesToShow = 5;
+                    const totalPages = pagination.total_pages;
+                    const currentPage = pagination.current_page;
+
+                    // Calculate start and end page numbers to display
+                    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+                    // Adjust start if we're near the end
+                    if (endPage - startPage < maxPagesToShow - 1) {
+                      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                    }
+
+                    const pages = [];
+
+                    // First page + ellipsis
+                    if (startPage > 1) {
+                      pages.push(
+                        <button
+                          key={1}
+                          onClick={() => handlePageChange(1)}
+                          className="px-3 py-2 rounded text-[#3bb77e] hover:bg-[#def9ec] transition-colors text-[12px] font-['Poppins',sans-serif]"
+                        >
+                          1
+                        </button>
+                      );
+                      if (startPage > 2) {
+                        pages.push(
+                          <span key="ellipsis-start" className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        );
+                      }
+                    }
+
+                    // Page numbers
+                    for (let page = startPage; page <= endPage; page++) {
+                      pages.push(
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${currentPage === page
+                            ? 'bg-[#3bb77e] text-white'
+                            : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    }
+
+                    // Ellipsis + last page
+                    if (endPage < totalPages) {
+                      if (endPage < totalPages - 1) {
+                        pages.push(
+                          <span key="ellipsis-end" className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        );
+                      }
+                      pages.push(
+                        <button
+                          key={totalPages}
+                          onClick={() => handlePageChange(totalPages)}
+                          className="px-3 py-2 rounded text-[#3bb77e] hover:bg-[#def9ec] transition-colors text-[12px] font-['Poppins',sans-serif]"
+                        >
+                          {totalPages}
+                        </button>
+                      );
+                    }
+
+                    return pages;
+                  })()}
+
+                  {/* Next button */}
+                  <button
+                    onClick={() => handlePageChange(pagination.current_page + 1)}
+                    disabled={!pagination.has_next}
+                    className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${!pagination.has_next
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      }`}
+                  >
+                    Next ›
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Results Summary */}
+            <div className="text-center text-sm text-gray-600 font-['Poppins',sans-serif] mt-4">
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, pagination.total)} of {pagination.total} products
+            </div>
+          </>
         )}
       </div>
     </Layout>

@@ -37,14 +37,6 @@ function App() {
           }
         />
         <Route
-          path="/products/checkout"
-          element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/products/list"
           element={
             <ProtectedRoute>

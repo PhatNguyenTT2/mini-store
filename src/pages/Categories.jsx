@@ -12,14 +12,22 @@ export const Categories = () => {
   ];
   const [categories, setCategories] = useState([]);
   const [filteredCategories, setFilteredCategories] = useState([]);
+  const [paginatedCategories, setPaginatedCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Filters and sorting
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState('name');
   const [sortOrder, setSortOrder] = useState('asc');
+
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    itemsPerPage: 10,
+  });
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -61,11 +69,24 @@ export const Categories = () => {
       return 0;
     });
 
-    // Apply items per page limit
-    result = result.slice(0, itemsPerPage);
-
     setFilteredCategories(result);
+
+    // Update pagination
+    const totalPages = Math.ceil(result.length / itemsPerPage);
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1, // Reset to first page on filter change
+      totalPages,
+      itemsPerPage,
+    }));
   }, [categories, searchQuery, sortField, sortOrder, itemsPerPage]);
+
+  // Paginate filtered categories
+  useEffect(() => {
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    setPaginatedCategories(filteredCategories.slice(startIndex, endIndex));
+  }, [filteredCategories, pagination.currentPage, pagination.itemsPerPage]);
 
   const fetchCategories = async () => {
     try {
@@ -107,6 +128,15 @@ export const Categories = () => {
 
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: newPage
+    }));
+    // Scroll to top smoothly
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAddCategory = () => {
@@ -175,24 +205,129 @@ export const Categories = () => {
 
         {/* Category List Table */}
         {!isLoading && !error && (
-          <CategoryList
-            categories={filteredCategories}
-            onSort={handleColumnSort}
-            sortField={sortField}
-            sortOrder={sortOrder}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        )}
+          <>
+            <CategoryList
+              categories={paginatedCategories}
+              onSort={handleColumnSort}
+              sortField={sortField}
+              sortOrder={sortOrder}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
 
-        {/* Results Info */}
-        {!isLoading && !error && filteredCategories.length > 0 && (
-          <div className="flex justify-between items-center px-4 py-3 bg-white rounded-lg shadow-sm">
-            <p className="text-sm text-gray-600">
-              Showing <span className="font-medium">{filteredCategories.length}</span> of{' '}
-              <span className="font-medium">{categories.length}</span> categories
-            </p>
-          </div>
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center mt-6">
+                <div className="flex items-center gap-2">
+                  {/* Previous button */}
+                  <button
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                    className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${pagination.currentPage === 1
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      }`}
+                  >
+                    ‹ Previous
+                  </button>
+
+                  {/* Page numbers */}
+                  {(() => {
+                    const maxPagesToShow = 5;
+                    const { totalPages, currentPage } = pagination;
+
+                    // Calculate start and end page numbers to display
+                    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+                    // Adjust start if we're near the end
+                    if (endPage - startPage < maxPagesToShow - 1) {
+                      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                    }
+
+                    const pages = [];
+
+                    // First page + ellipsis
+                    if (startPage > 1) {
+                      pages.push(
+                        <button
+                          key={1}
+                          onClick={() => handlePageChange(1)}
+                          className="px-3 py-2 rounded text-[#3bb77e] hover:bg-[#def9ec] transition-colors text-[12px] font-['Poppins',sans-serif]"
+                        >
+                          1
+                        </button>
+                      );
+                      if (startPage > 2) {
+                        pages.push(
+                          <span key="ellipsis-start" className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        );
+                      }
+                    }
+
+                    // Page numbers
+                    for (let page = startPage; page <= endPage; page++) {
+                      pages.push(
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${currentPage === page
+                              ? 'bg-[#3bb77e] text-white'
+                              : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    }
+
+                    // Ellipsis + last page
+                    if (endPage < totalPages) {
+                      if (endPage < totalPages - 1) {
+                        pages.push(
+                          <span key="ellipsis-end" className="px-2 text-gray-400">
+                            ...
+                          </span>
+                        );
+                      }
+                      pages.push(
+                        <button
+                          key={totalPages}
+                          onClick={() => handlePageChange(totalPages)}
+                          className="px-3 py-2 rounded text-[#3bb77e] hover:bg-[#def9ec] transition-colors text-[12px] font-['Poppins',sans-serif]"
+                        >
+                          {totalPages}
+                        </button>
+                      );
+                    }
+
+                    return pages;
+                  })()}
+
+                  {/* Next button */}
+                  <button
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${pagination.currentPage === pagination.totalPages
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      }`}
+                  >
+                    Next ›
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Results Summary */}
+            {paginatedCategories.length > 0 && (
+              <div className="text-center text-sm text-gray-600 font-['Poppins',sans-serif] mt-4">
+                Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to {Math.min(pagination.currentPage * pagination.itemsPerPage, filteredCategories.length)} of {filteredCategories.length} categories
+              </div>
+            )}
+          </>
         )}
 
         {/* Empty State */}
