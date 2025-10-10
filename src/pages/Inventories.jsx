@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { SupplierListHeader, SupplierList } from '../components/SupplierList';
-import supplierService from '../services/supplierService';
+import { InventoryListHeader, InventoryList } from '../components/InventoryList';
+import { StockInModal, StockOutModal, MovementHistoryModal } from '../components/StockModals';
+import inventoryService from '../services/inventoryService';
 
-const Suppliers = () => {
+const Inventories = () => {
   // Breadcrumb items
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Suppliers', href: null },
+    { label: 'Inventory', href: null },
   ];
 
   // State management
-  const [suppliers, setSuppliers] = useState([]);
+  const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
@@ -32,24 +33,53 @@ const Suppliers = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Sort state
-  const [sortField, setSortField] = useState('supplierCode');
+  const [sortField, setSortField] = useState('sku');
   const [sortOrder, setSortOrder] = useState('asc');
 
-  // Fetch suppliers from API
-  const fetchSuppliers = async () => {
+  // Filter view state
+  const [filterView, setFilterView] = useState('all'); // 'all', 'low-stock', 'out-of-stock'
+
+  // Modal states
+  const [stockInModal, setStockInModal] = useState({ isOpen: false, product: null });
+  const [stockOutModal, setStockOutModal] = useState({ isOpen: false, product: null });
+  const [movementHistoryModal, setMovementHistoryModal] = useState({
+    isOpen: false,
+    productId: null,
+    productName: null,
+    productSku: null
+  });
+
+  // Fetch inventory from API
+  const fetchInventory = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      console.log('Fetching suppliers with filters:', filters);
+      console.log('Fetching inventory with filters:', filters);
+      console.log('Filter view:', filterView);
 
-      const response = await supplierService.getSuppliers(filters);
+      const params = { ...filters };
+
+      // Add filter view params
+      if (filterView === 'low-stock') {
+        params.lowStock = 'true';
+      } else if (filterView === 'out-of-stock') {
+        params.outOfStock = 'true';
+      }
+
+      console.log('Request params:', params);
+
+      const response = await inventoryService.getInventory(params);
       console.log('API Response:', response);
 
-      if (response.success) {
-        const formattedSuppliers = supplierService.formatSuppliersForDisplay(response.data.suppliers);
-        console.log('Formatted suppliers:', formattedSuppliers);
-        setSuppliers(formattedSuppliers);
+      if (response.success && response.data) {
+        const inventoryData = response.data.inventory || [];
+        console.log('Raw inventory data:', inventoryData);
+
+        const formattedInventory = inventoryService.formatInventoryForDisplay(inventoryData);
+        console.log('Formatted inventory:', formattedInventory);
+
+        setInventory(formattedInventory);
 
         // Map pagination to match expected format
         setPagination({
@@ -58,25 +88,39 @@ const Suppliers = () => {
           total: response.data.pagination.total,
           pages: response.data.pagination.total_pages
         });
+      } else {
+        console.warn('Response format unexpected:', response);
+        setError('Unexpected response format from server');
       }
     } catch (err) {
-      console.error('Error fetching suppliers:', err);
-      setError(err.error || err.message || 'Failed to fetch suppliers. Please try again.');
+      console.error('Error fetching inventory:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      setError(err.response?.data?.error || err.error || err.message || 'Failed to fetch inventory. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch suppliers on component mount and when filters change
+  // Fetch inventory on component mount and when filters change
   useEffect(() => {
-    console.log('Suppliers component mounted or filters changed');
-    fetchSuppliers();
+    console.log('Inventories component mounted or filters changed');
+    fetchInventory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.page, filters.limit]);
+  }, [filters.page, filters.limit, filterView]);
 
   // Handle filter changes
   const handleItemsPerPageChange = (newLimit) => {
     setFilters({ ...filters, limit: newLimit, page: 1 });
+  };
+
+  // Handle filter view change
+  const handleFilterViewChange = (view) => {
+    setFilterView(view);
+    setFilters({ ...filters, page: 1 });
   };
 
   // Handle search
@@ -85,25 +129,20 @@ const Suppliers = () => {
 
     if (!searchLower) {
       // If search is empty, reset to original data
-      fetchSuppliers();
+      fetchInventory();
       return;
     }
 
-    // Filter suppliers locally
-    const allSuppliers = [...suppliers];
-    const filtered = allSuppliers.filter(supplier => {
-      const supplierCode = (supplier.supplierCode || '').toLowerCase();
-      const companyName = (supplier.companyName || '').toLowerCase();
-      const email = (supplier.email || '').toLowerCase();
-      const phone = (supplier.phone || '').toLowerCase();
+    // Filter inventory locally
+    const allInventory = [...inventory];
+    const filtered = allInventory.filter(item => {
+      const sku = (item.sku || '').toLowerCase();
+      const productName = (item.productName || '').toLowerCase();
 
-      return supplierCode.includes(searchLower) ||
-        companyName.includes(searchLower) ||
-        email.includes(searchLower) ||
-        phone.includes(searchLower);
+      return sku.includes(searchLower) || productName.includes(searchLower);
     });
 
-    setSuppliers(filtered);
+    setInventory(filtered);
   };
 
   // Handle column sort
@@ -118,16 +157,16 @@ const Suppliers = () => {
     setSortField(field);
     setSortOrder(newSortOrder);
 
-    // Sort suppliers locally
-    const sorted = [...suppliers].sort((a, b) => {
+    // Sort inventory locally
+    const sorted = [...inventory].sort((a, b) => {
       let aVal = a[field];
       let bVal = b[field];
 
       // Handle different data types
-      if (field === 'creditLimit' || field === 'currentDebt') {
+      if (field === 'quantityOnHand' || field === 'quantityReserved' || field === 'quantityAvailable' || field === 'reorderPoint') {
         aVal = Number(aVal || 0);
         bVal = Number(bVal || 0);
-      } else if (field === 'createdAt') {
+      } else if (field === 'lastRestocked' || field === 'createdAt') {
         aVal = aVal ? new Date(aVal).getTime() : 0;
         bVal = bVal ? new Date(bVal).getTime() : 0;
       } else {
@@ -142,13 +181,40 @@ const Suppliers = () => {
       }
     });
 
-    setSuppliers(sorted);
+    setInventory(sorted);
   };
 
-  // Handle add supplier
-  const handleAddSupplier = () => {
-    console.log('Add new supplier clicked');
-    alert('Add Supplier functionality will be implemented soon!');
+  // Handle stock in
+  const handleStockIn = (productId = null) => {
+    setStockInModal({ isOpen: true, product: productId });
+  };
+
+  // Handle stock out
+  const handleStockOut = (productId = null) => {
+    setStockOutModal({ isOpen: true, product: productId });
+  };
+
+  // Handle adjust (using stock in for now)
+  const handleAdjust = () => {
+    console.log('Adjust Stock clicked');
+    alert('Adjust Stock modal will be implemented in next phase!');
+  };
+
+  // Handle view movement history
+  const handleViewHistory = (item) => {
+    setMovementHistoryModal({
+      isOpen: true,
+      productId: item.productId,
+      productName: item.productName,
+      productSku: item.sku
+    });
+  };
+
+  // Handle stock operation success
+  const handleStockSuccess = (data) => {
+    console.log('Stock operation successful:', data);
+    // Refresh inventory list
+    fetchInventory();
   };
 
   return (
@@ -157,14 +223,18 @@ const Suppliers = () => {
         {/* Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} />
 
-        {/* Supplier List Header */}
-        <SupplierListHeader
+        {/* Inventory List Header */}
+        <InventoryListHeader
           itemsPerPage={filters.limit}
           onItemsPerPageChange={handleItemsPerPageChange}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
-          onAddSupplier={handleAddSupplier}
+          onStockIn={handleStockIn}
+          onStockOut={handleStockOut}
+          onAdjust={handleAdjust}
+          filterView={filterView}
+          onFilterViewChange={handleFilterViewChange}
         />
 
         {/* Loading State */}
@@ -177,10 +247,10 @@ const Suppliers = () => {
         {/* Error State */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            <p className="font-medium">Error loading suppliers</p>
+            <p className="font-medium">Error loading inventory</p>
             <p className="text-sm mt-1">{error}</p>
             <button
-              onClick={fetchSuppliers}
+              onClick={fetchInventory}
               className="mt-2 text-sm underline hover:no-underline"
             >
               Try again
@@ -188,14 +258,17 @@ const Suppliers = () => {
           </div>
         )}
 
-        {/* Supplier List Table */}
+        {/* Inventory List Table */}
         {!loading && !error && (
           <>
-            <SupplierList
-              suppliers={suppliers}
+            <InventoryList
+              inventory={inventory}
               onSort={handleColumnSort}
               sortField={sortField}
               sortOrder={sortOrder}
+              onViewHistory={handleViewHistory}
+              onStockIn={handleStockIn}
+              onStockOut={handleStockOut}
             />
 
             {/* Pagination */}
@@ -304,27 +377,51 @@ const Suppliers = () => {
             )}
 
             {/* Results Summary */}
-            {suppliers.length > 0 && (
+            {inventory.length > 0 && (
               <div className="text-center text-sm text-gray-600 font-['Poppins',sans-serif] mt-4">
                 Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
                 {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-                {pagination.total} suppliers
+                {pagination.total} items
               </div>
             )}
 
             {/* Empty State */}
-            {suppliers.length === 0 && !loading && (
+            {inventory.length === 0 && !loading && (
               <div className="bg-white rounded-lg shadow-sm p-12 text-center">
                 <p className="text-gray-500 text-[14px] font-['Poppins',sans-serif]">
-                  No suppliers found
+                  No inventory items found
                 </p>
               </div>
             )}
           </>
         )}
       </div>
+
+      {/* Modals */}
+      <StockInModal
+        isOpen={stockInModal.isOpen}
+        onClose={() => setStockInModal({ isOpen: false, product: null })}
+        onSuccess={handleStockSuccess}
+        preSelectedProduct={stockInModal.product}
+      />
+
+      <StockOutModal
+        isOpen={stockOutModal.isOpen}
+        onClose={() => setStockOutModal({ isOpen: false, product: null })}
+        onSuccess={handleStockSuccess}
+        preSelectedProduct={stockOutModal.product}
+      />
+
+      <MovementHistoryModal
+        isOpen={movementHistoryModal.isOpen}
+        onClose={() => setMovementHistoryModal({ isOpen: false, productId: null, productName: null, productSku: null })}
+        productId={movementHistoryModal.productId}
+        productName={movementHistoryModal.productName}
+        productSku={movementHistoryModal.productSku}
+      />
     </Layout>
   );
 };
 
-export default Suppliers;
+export default Inventories;
+

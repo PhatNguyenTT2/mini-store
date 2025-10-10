@@ -12,6 +12,12 @@ const customerService = {
    */
   getCustomers: async (params = {}) => {
     try {
+      // Map per_page to limit for backend compatibility
+      if (params.per_page) {
+        params.limit = params.per_page
+        delete params.per_page
+      }
+
       const response = await api.get('/customers', { params })
       return response.data
     } catch (error) {
@@ -93,8 +99,8 @@ const customerService = {
       fullName: customer.fullName,
       email: customer.email,
       phone: customer.phone || null,
-      address: customer.address || null,
-      dob: customer.dob || null,
+      address: customer.address?.city || null,
+      dob: customer.dateOfBirth || customer.dob || null, // Backend uses dateOfBirth
       gender: customer.gender || null,
       customerType: customer.customerType || 'Regular',
       createdAt: customer.createdAt,

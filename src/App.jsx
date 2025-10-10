@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Dashboard, ViewProduct, DetailProduct, ListProduct, LoginSignup, Orders, Categories, Users, TestUsers, Customers, Suppliers } from "./pages";
+import { Dashboard, ViewProduct, DetailProduct, ListProduct, LoginSignup, Orders, Categories, Users, TestUsers, Customers, Suppliers, Inventories } from "./pages";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -89,6 +89,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Suppliers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/inventories"
+          element={
+            <ProtectedRoute>
+              <Inventories />
             </ProtectedRoute>
           }
         />

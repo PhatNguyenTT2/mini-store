@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { OrderListHeader, OrderList } from '../components/OrderList';
+import { AddOrderModal } from '../components/OrderModals';
 import orderService from '../services/orderService';
 
 const Orders = () => {
@@ -36,6 +37,9 @@ const Orders = () => {
   // Sort state
   const [sortField, setSortField] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
+
+  // Modal state
+  const [addOrderModal, setAddOrderModal] = useState(false);
 
   // Fetch orders from API
   const fetchOrders = async () => {
@@ -167,10 +171,15 @@ const Orders = () => {
     setOrders(sorted);
   };
 
-  // Handle add order (from Actions dropdown)
+  // Handle add order
   const handleAddOrder = () => {
-    console.log('Add new order clicked');
-    alert('Add Order functionality will be implemented soon!');
+    setAddOrderModal(true);
+  };
+
+  // Handle order created successfully
+  const handleOrderSuccess = (data) => {
+    console.log('Order created successfully:', data);
+    fetchOrders(); // Refresh list
   };
 
   return (
@@ -338,6 +347,13 @@ const Orders = () => {
           </>
         )}
       </div>
+
+      {/* Add Order Modal */}
+      <AddOrderModal
+        isOpen={addOrderModal}
+        onClose={() => setAddOrderModal(false)}
+        onSuccess={handleOrderSuccess}
+      />
     </Layout>
   );
 };

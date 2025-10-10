@@ -12,6 +12,7 @@ const supplierService = {
    */
   getSuppliers: async (params = {}) => {
     try {
+      // Map limit to limit (already correct, but ensure consistency)
       const response = await api.get('/suppliers', { params })
       return response.data
     } catch (error) {
@@ -159,12 +160,10 @@ const supplierService = {
       contactPerson: supplier.contactPerson || null,
       email: supplier.email,
       phone: supplier.phone || null,
-      address: supplier.address || null,
+      address: supplier.address?.city || null,
       taxId: supplier.taxId || null,
-      paymentTerms: supplier.paymentTerms || 'Net 30',
       creditLimit: supplier.creditLimit || 0,
       currentDebt: supplier.currentDebt || 0,
-      notes: supplier.notes || null,
       rating: supplier.rating || 0,
       isActive: supplier.isActive !== undefined ? supplier.isActive : true,
       createdAt: supplier.createdAt,

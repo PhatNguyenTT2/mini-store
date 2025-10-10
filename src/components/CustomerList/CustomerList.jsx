@@ -106,12 +106,12 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder }) =
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container - overflow-x-auto allows horizontal scroll */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1200px]">
+        <div className="min-w-[1060px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* ID Column - Sortable */}
             <div
-              className="w-[100px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('customerCode')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -128,17 +128,6 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder }) =
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 Name
                 {getSortIcon('fullName')}
-              </p>
-            </div>
-
-            {/* Email Column - Sortable */}
-            <div
-              className="flex-1 min-w-[180px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
-              onClick={() => handleSortClick('email')}
-            >
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
-                Email
-                {getSortIcon('email')}
               </p>
             </div>
 
@@ -199,7 +188,7 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder }) =
                     }`}
                 >
                   {/* ID - Display customerCode */}
-                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-emerald-600 leading-[20px]">
                       {customer.customerCode}
                     </p>
@@ -209,13 +198,6 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder }) =
                   <div className="flex-1 min-w-[150px] px-3 flex items-center">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                       {customer.fullName}
-                    </p>
-                  </div>
-
-                  {/* Email */}
-                  <div className="flex-1 min-w-[180px] px-3 flex items-center">
-                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
-                      {customer.email}
                     </p>
                   </div>
 

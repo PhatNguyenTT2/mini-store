@@ -9,3 +9,4 @@ export { default as Users } from "./Users";
 export { default as TestUsers } from "./TestUsers";
 export { default as Customers } from "./Customers";
 export { default as Suppliers } from "./Suppliers";
+export { default as Inventories } from "./Inventories";

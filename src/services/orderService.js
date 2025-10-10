@@ -12,7 +12,17 @@ const orderService = {
    */
   getOrders: async (params = {}) => {
     try {
-      const response = await api.get('/orders', { params })
+      // Clean params - remove empty values
+      const cleanParams = {}
+      Object.keys(params).forEach(key => {
+        const value = params[key]
+        // Only include non-empty values
+        if (value !== '' && value !== null && value !== undefined) {
+          cleanParams[key] = value
+        }
+      })
+
+      const response = await api.get('/orders', { params: cleanParams })
       return response.data
     } catch (error) {
       console.error('Error fetching orders:', error)
@@ -36,9 +46,24 @@ const orderService = {
   },
 
   /**
+   * Create new order
+   * @param {Object} orderData - Order data
+   * @returns {Promise} Created order
+   */
+  createOrder: async (orderData) => {
+    try {
+      const response = await api.post('/orders', orderData)
+      return response.data
+    } catch (error) {
+      console.error('Error creating order:', error)
+      throw error.response?.data || error
+    }
+  },
+
+  /**
    * Update order status
    * @param {string} id - Order ID
-   * @param {string} status - New status (pending, processing, shipping, delivered, cancelled)
+   * @param {string} status - New status
    * @returns {Promise} Updated order
    */
   updateOrderStatus: async (id, status) => {
@@ -46,15 +71,15 @@ const orderService = {
       const response = await api.patch(`/orders/${id}/status`, { status })
       return response.data
     } catch (error) {
-      console.error(`Error updating order ${id} status:`, error)
+      console.error(`Error updating order status ${id}:`, error)
       throw error.response?.data || error
     }
   },
 
   /**
-   * Update payment status
+   * Update order payment status
    * @param {string} id - Order ID
-   * @param {string} paymentStatus - New payment status (pending, paid, failed, refunded)
+   * @param {string} paymentStatus - New payment status
    * @returns {Promise} Updated order
    */
   updatePaymentStatus: async (id, paymentStatus) => {
@@ -62,66 +87,49 @@ const orderService = {
       const response = await api.patch(`/orders/${id}/payment`, { paymentStatus })
       return response.data
     } catch (error) {
-      console.error(`Error updating order ${id} payment status:`, error)
+      console.error(`Error updating payment status ${id}:`, error)
       throw error.response?.data || error
     }
   },
 
   /**
-   * Get current user's orders
-   * @param {Object} params - Query parameters
-   * @returns {Promise} User's order list
+   * Get order statistics
+   * @returns {Promise} Order statistics
    */
-  getMyOrders: async (params = {}) => {
+  getOrderStats: async () => {
     try {
-      const response = await api.get('/orders/user/my-orders', { params })
+      const response = await api.get('/orders/stats')
       return response.data
     } catch (error) {
-      console.error('Error fetching my orders:', error)
+      console.error('Error fetching order stats:', error)
       throw error.response?.data || error
     }
   },
 
   /**
-   * Helper: Format order data for display
-   * Converts backend Order model to OrderList component format
-   * @param {Object} order - Order from backend
-   * @returns {Object} Formatted order for display
-   */
-  formatOrderForDisplay: (order) => {
-    // Backend model có toJSON transform: _id -> id
-    const orderId = order.id || order._id
-
-    return {
-      id: orderId,
-      orderNumber: order.orderNumber,
-      customerName: order.customer?.name || 'N/A',
-      customerEmail: order.customer?.email || '',
-      customerPhone: order.customer?.phone || '',
-      date: new Date(order.createdAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      }),
-      total: order.total.toFixed(2),
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-      paymentMethod: order.paymentMethod,
-      items: order.items || [],
-      shippingAddress: order.shippingAddress,
-      trackingNumber: order.trackingNumber,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt
-    }
-  },
-
-  /**
-   * Helper: Format multiple orders for display
-   * @param {Array} orders - Array of orders from backend
+   * Format orders data for display in the table
+   * @param {Array} orders - Raw orders from API
    * @returns {Array} Formatted orders
    */
   formatOrdersForDisplay: (orders) => {
-    return orders.map(orderService.formatOrderForDisplay)
+    return orders.map(order => ({
+      id: order.id || order._id,
+      orderNumber: order.orderNumber,
+      customerName: order.customer?.name || 'Unknown Customer',
+      customerEmail: order.customer?.email || null,
+      customerPhone: order.customer?.phone || null,
+      date: order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) : 'N/A',
+      total: order.total?.toFixed(2) || '0.00',
+      status: order.status || 'pending',
+      paymentStatus: order.paymentStatus || 'pending',
+      items: order.items || [],
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt
+    }))
   }
 }
 
