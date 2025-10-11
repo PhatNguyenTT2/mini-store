@@ -224,23 +224,37 @@ const inventoryService = {
    * @returns {Array} Formatted inventory
    */
   formatInventoryForDisplay: (inventoryItems) => {
-    return inventoryItems.map(item => ({
-      id: item.id || item._id,
-      productId: item.product?.id || item.product?._id,
-      sku: item.product?.sku || 'N/A',
-      productName: item.product?.name || 'Unknown Product',
-      quantityOnHand: item.quantityOnHand || 0,
-      quantityReserved: item.quantityReserved || 0,
-      quantityAvailable: item.quantityAvailable || 0,
-      reorderPoint: item.reorderPoint || 0,
-      reorderQuantity: item.reorderQuantity || 0,
-      warehouseLocation: item.warehouseLocation || null,
-      lastRestocked: item.lastRestocked || null,
-      lastSold: item.lastSold || null,
-      isLowStock: item.isLowStock || false,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt
-    }))
+    // Handle null, undefined, or non-array input
+    if (!inventoryItems || !Array.isArray(inventoryItems)) {
+      console.warn('formatInventoryForDisplay received invalid input:', inventoryItems);
+      return [];
+    }
+
+    return inventoryItems.map(item => {
+      // Handle missing item
+      if (!item) {
+        console.warn('Found null/undefined item in inventory array');
+        return null;
+      }
+
+      return {
+        id: item.id || item._id,
+        productId: item.product?.id || item.product?._id,
+        sku: item.product?.sku || 'N/A',
+        productName: item.product?.name || 'Unknown Product',
+        quantityOnHand: item.quantityOnHand || 0,
+        quantityReserved: item.quantityReserved || 0,
+        quantityAvailable: item.quantityAvailable || 0,
+        reorderPoint: item.reorderPoint || 0,
+        reorderQuantity: item.reorderQuantity || 0,
+        warehouseLocation: item.warehouseLocation || null,
+        lastRestocked: item.lastRestocked || null,
+        lastSold: item.lastSold || null,
+        isLowStock: item.isLowStock || false,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt
+      };
+    }).filter(item => item !== null); // Remove any null items
   }
 }
 

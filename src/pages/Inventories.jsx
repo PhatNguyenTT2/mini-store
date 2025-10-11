@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { InventoryListHeader, InventoryList } from '../components/InventoryList';
-import { StockInModal, StockOutModal, MovementHistoryModal } from '../components/StockModals';
+import { StockInModal, MovementHistoryModal } from '../components/StockModals';
 import inventoryService from '../services/inventoryService';
 
 const Inventories = () => {
@@ -41,7 +41,8 @@ const Inventories = () => {
 
   // Modal states
   const [stockInModal, setStockInModal] = useState({ isOpen: false, product: null });
-  const [stockOutModal, setStockOutModal] = useState({ isOpen: false, product: null });
+  // const [stockOutModal, setStockOutModal] = useState({ isOpen: false, product: null });
+  // const [adjustStockModal, setAdjustStockModal] = useState({ isOpen: false, product: null });
   const [movementHistoryModal, setMovementHistoryModal] = useState({
     isOpen: false,
     productId: null,
@@ -72,25 +73,36 @@ const Inventories = () => {
       const response = await inventoryService.getInventory(params);
       console.log('API Response:', response);
 
-      if (response.success && response.data) {
+      if (response && response.success && response.data) {
         const inventoryData = response.data.inventory || [];
         console.log('Raw inventory data:', inventoryData);
+
+        // Ensure inventoryData is an array
+        if (!Array.isArray(inventoryData)) {
+          console.error('Inventory data is not an array:', inventoryData);
+          setError('Invalid data format received from server');
+          setInventory([]);
+          return;
+        }
 
         const formattedInventory = inventoryService.formatInventoryForDisplay(inventoryData);
         console.log('Formatted inventory:', formattedInventory);
 
-        setInventory(formattedInventory);
+        setInventory(formattedInventory || []);
 
-        // Map pagination to match expected format
-        setPagination({
-          page: response.data.pagination.current_page,
-          limit: response.data.pagination.per_page,
-          total: response.data.pagination.total,
-          pages: response.data.pagination.total_pages
-        });
+        // Map pagination to match expected format with safe access
+        if (response.data.pagination) {
+          setPagination({
+            page: response.data.pagination.current_page || 1,
+            limit: response.data.pagination.per_page || 20,
+            total: response.data.pagination.total || 0,
+            pages: response.data.pagination.total_pages || 1
+          });
+        }
       } else {
         console.warn('Response format unexpected:', response);
         setError('Unexpected response format from server');
+        setInventory([]);
       }
     } catch (err) {
       console.error('Error fetching inventory:', err);
@@ -194,10 +206,9 @@ const Inventories = () => {
     setStockOutModal({ isOpen: true, product: productId });
   };
 
-  // Handle adjust (using stock in for now)
-  const handleAdjust = () => {
-    console.log('Adjust Stock clicked');
-    alert('Adjust Stock modal will be implemented in next phase!');
+  // Handle adjust stock
+  const handleAdjust = (productId = null) => {
+    setAdjustStockModal({ isOpen: true, product: productId });
   };
 
   // Handle view movement history
@@ -269,6 +280,7 @@ const Inventories = () => {
               onViewHistory={handleViewHistory}
               onStockIn={handleStockIn}
               onStockOut={handleStockOut}
+              onAdjust={handleAdjust}
             />
 
             {/* Pagination */}
@@ -405,12 +417,19 @@ const Inventories = () => {
         preSelectedProduct={stockInModal.product}
       />
 
-      <StockOutModal
+      {/* <StockOutModal
         isOpen={stockOutModal.isOpen}
         onClose={() => setStockOutModal({ isOpen: false, product: null })}
         onSuccess={handleStockSuccess}
         preSelectedProduct={stockOutModal.product}
       />
+
+      <AdjustStockModal
+        isOpen={adjustStockModal.isOpen}
+        onClose={() => setAdjustStockModal({ isOpen: false, product: null })}
+        onSuccess={handleStockSuccess}
+        preSelectedProduct={adjustStockModal.product}
+      /> */}
 
       <MovementHistoryModal
         isOpen={movementHistoryModal.isOpen}
