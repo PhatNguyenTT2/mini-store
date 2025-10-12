@@ -90,20 +90,7 @@ export const NavigationMenuSection = () => {
           ]
         },
         { name: 'Payments', icon: DollarSign, href: '/payments' },
-        {
-          name: 'Reports',
-          icon: ReceiptEuro,
-          arrow: true,
-          submenu: [
-            { name: 'Sales', href: '/reports/sales' },
-            { name: 'Inventory', href: '/reports/inventory' },
-            { name: 'Revenue', href: '/reports/revenue' },
-            { name: 'Profit', href: '/reports/profit' },
-            { name: 'Customer', href: '/reports/customer' },
-            { name: 'Supplier', href: '/reports/supplier' },
-            { name: 'Products', href: '/reports/products' },
-          ]
-        },
+        { name: 'Reports', icon: ReceiptEuro },
       ],
     },
     // {

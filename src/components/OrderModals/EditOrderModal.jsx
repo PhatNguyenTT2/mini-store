@@ -3,7 +3,7 @@ import productService from '../../services/productService';
 import customerService from '../../services/customerService';
 import orderService from '../../services/orderService';
 
-export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
+export const EditOrderModal = ({ isOpen, onClose, onSuccess, order }) => {
   const dropdownRefs = useRef({});
   const [formData, setFormData] = useState({
     customer: {
@@ -58,6 +58,57 @@ export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
     }
   }, [isOpen]);
 
+  // Load order data when modal opens
+  useEffect(() => {
+    if (isOpen && order) {
+      // Set form data from order
+      setFormData({
+        customer: {
+          name: order.customer?.name || order.customerName || '',
+          email: order.customer?.email || '',
+          phone: order.customer?.phone || ''
+        },
+        deliveryType: order.deliveryType || 'delivery',
+        shippingAddress: {
+          street: order.shippingAddress?.street || '',
+          city: order.shippingAddress?.city || '',
+          state: order.shippingAddress?.state || '',
+          zipCode: order.shippingAddress?.zipCode || '',
+          country: order.shippingAddress?.country || 'Vietnam'
+        },
+        paymentMethod: order.paymentMethod || 'cash',
+        customerNote: order.customerNote || ''
+      });
+
+      // Set items from order
+      if (order.items && Array.isArray(order.items)) {
+        const orderItems = order.items.map(item => ({
+          product: item.product?.id || item.product || '',
+          quantity: item.quantity || 1
+        }));
+        setItems(orderItems);
+
+        // Set product search terms
+        const searchTerms = {};
+        order.items.forEach((item, index) => {
+          searchTerms[index] = item.product?.name || item.productName || '';
+        });
+        setProductSearchTerms(searchTerms);
+      }
+
+      // Try to find matching customer
+      const matchingCustomer = customers.find(c =>
+        c.email === order.customer?.email || c.phone === order.customer?.phone
+      );
+      if (matchingCustomer) {
+        setSelectedCustomer(matchingCustomer.id);
+      }
+
+      setError(null);
+      setShowProductDropdown({});
+    }
+  }, [isOpen, order, customers]);
+
   // Auto-fill customer info when selecting existing customer
   useEffect(() => {
     if (selectedCustomer) {
@@ -99,24 +150,6 @@ export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showProductDropdown]);
-
-  // Reset form
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        customer: { name: '', email: '', phone: '' },
-        deliveryType: 'delivery',
-        shippingAddress: { street: '', city: '', state: '', zipCode: '', country: 'Vietnam' },
-        paymentMethod: 'cash',
-        customerNote: ''
-      });
-      setItems([]);
-      setSelectedCustomer('');
-      setError(null);
-      setProductSearchTerms({});
-      setShowProductDropdown({});
-    }
-  }, [isOpen]);
 
   const addItem = () => {
     const newIndex = items.length;
@@ -249,20 +282,20 @@ export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
         customerNote: formData.customerNote || undefined
       };
 
-      const response = await orderService.createOrder(orderData);
+      const response = await orderService.updateOrder(order.id, orderData);
 
       if (onSuccess) {
         onSuccess(response);
       }
       onClose();
     } catch (err) {
-      setError(err.error || err.message || 'Failed to create order. Please try again.');
+      setError(err.error || err.message || 'Failed to update order. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !order) return null;
 
   const totals = calculateTotal();
 
@@ -272,7 +305,7 @@ export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-[20px] font-semibold font-['Poppins',sans-serif] text-[#212529]">
-            Create New Order
+            Edit Order {order.orderNumber}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -656,10 +689,10 @@ export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Creating...
+                  Updating...
                 </>
               ) : (
-                'Create Order'
+                'Update Order'
               )}
             </button>
           </div>
@@ -668,4 +701,3 @@ export const AddOrderModal = ({ isOpen, onClose, onSuccess }) => {
     </div>
   );
 };
-

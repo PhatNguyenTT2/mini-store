@@ -118,6 +118,7 @@ const orderService = {
       customerName: order.customer?.name || 'Unknown Customer',
       customerEmail: order.customer?.email || null,
       customerPhone: order.customer?.phone || null,
+      customer: order.customer || null,
       date: order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -126,6 +127,10 @@ const orderService = {
       total: order.total?.toFixed(2) || '0.00',
       status: order.status || 'pending',
       paymentStatus: order.paymentStatus || 'pending',
+      paymentMethod: order.paymentMethod || 'cash',
+      deliveryType: order.deliveryType || 'delivery',
+      shippingAddress: order.shippingAddress || null,
+      user: order.user || null,
       items: order.items || [],
       createdAt: order.createdAt,
       updatedAt: order.updatedAt

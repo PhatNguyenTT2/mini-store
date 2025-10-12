@@ -82,16 +82,37 @@ const Payments = () => {
   const handleStatusChange = async (paymentId, newStatus) => {
     try {
       console.log('[Payments] Updating status:', paymentId, newStatus);
-      const response = await paymentService.updatePayment(paymentId, { status: newStatus });
+      // Use the new status update endpoint with inventory management
+      const response = await paymentService.updatePaymentStatus(paymentId, newStatus);
       console.log('[Payments] Update response:', response);
 
       if (response) {
         await fetchPayments();
         console.log('Payment status updated successfully');
+        // Show success message
+        alert(response.message || 'Payment status updated successfully');
       }
     } catch (err) {
       console.error('Error updating payment status:', err);
-      alert('Failed to update status. Please try again.');
+      alert(err.error || 'Failed to update status. Please try again.');
+    }
+  };
+
+  // Handle refund
+  const handleRefund = async (paymentId, amount, reason) => {
+    try {
+      console.log('[Payments] Processing refund:', paymentId, amount, reason);
+      const response = await paymentService.processRefund(paymentId, amount, reason);
+      console.log('[Payments] Refund response:', response);
+
+      if (response) {
+        await fetchPayments();
+        console.log('Refund processed successfully');
+        alert(response.message || 'Refund processed successfully');
+      }
+    } catch (err) {
+      console.error('Error processing refund:', err);
+      alert(err.error || 'Failed to process refund. Please try again.');
     }
   };
 
@@ -186,6 +207,7 @@ const Payments = () => {
         <PaymentList
           payments={payments}
           onStatusChange={handleStatusChange}
+          onRefund={handleRefund}
           onSort={handleSort}
           sortField={sortField}
           sortOrder={sortOrder}

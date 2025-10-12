@@ -73,6 +73,43 @@ const paymentService = {
   },
 
   /**
+   * Update payment status (with inventory management)
+   * @param {string} id - Payment ID
+   * @param {string} status - New status (pending, completed, failed)
+   * @returns {Promise} Updated payment
+   */
+  updatePaymentStatus: async (id, status) => {
+    try {
+      console.log(`[paymentService] Updating payment ${id} status to ${status}`);
+      const response = await api.put(`/payments/${id}/status`, { status });
+      console.log('[paymentService] Payment status updated:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('[paymentService] Error updating payment status:', error);
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Process refund for a payment (with inventory restoration)
+   * @param {string} id - Payment ID
+   * @param {number} amount - Refund amount
+   * @param {string} reason - Refund reason
+   * @returns {Promise} Updated payment
+   */
+  processRefund: async (id, amount, reason) => {
+    try {
+      console.log(`[paymentService] Processing refund for payment ${id}:`, { amount, reason });
+      const response = await api.post(`/payments/${id}/refund`, { amount, reason });
+      console.log('[paymentService] Refund processed:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('[paymentService] Error processing refund:', error);
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
    * Get payment statistics
    * @returns {Promise} Payment statistics
    */

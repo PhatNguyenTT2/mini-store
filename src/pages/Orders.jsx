@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { OrderListHeader, OrderList } from '../components/OrderList';
-import { AddOrderModal } from '../components/OrderModals';
+import { AddOrderModal, EditOrderModal } from '../components/OrderModals';
 import orderService from '../services/orderService';
 
 const Orders = () => {
@@ -40,6 +40,7 @@ const Orders = () => {
 
   // Modal state
   const [addOrderModal, setAddOrderModal] = useState(false);
+  const [editOrderModal, setEditOrderModal] = useState(null);
 
   // Fetch orders from API
   const fetchOrders = async () => {
@@ -226,6 +227,7 @@ const Orders = () => {
               orders={orders}
               onStatusChange={handleStatusChange}
               onPaymentStatusChange={handlePaymentStatusChange}
+              onEdit={(order) => setEditOrderModal(order)}
               onSort={handleColumnSort}
               sortField={sortField}
               sortOrder={sortOrder}
@@ -353,6 +355,14 @@ const Orders = () => {
         isOpen={addOrderModal}
         onClose={() => setAddOrderModal(false)}
         onSuccess={handleOrderSuccess}
+      />
+
+      {/* Edit Order Modal */}
+      <EditOrderModal
+        isOpen={!!editOrderModal}
+        onClose={() => setEditOrderModal(null)}
+        onSuccess={handleOrderSuccess}
+        order={editOrderModal}
       />
     </Layout>
   );

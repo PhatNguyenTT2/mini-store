@@ -5,7 +5,7 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all'); // 'all', 'in', 'adjustments'
+  const [filter, setFilter] = useState('all'); // 'all', 'in', 'out', 'adjustments'
 
   useEffect(() => {
     const fetchMovements = async () => {
@@ -38,6 +38,7 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
   const filteredMovements = (() => {
     if (filter === 'all') return movements;
     if (filter === 'in') return movements.filter(m => m.type === 'in');
+    if (filter === 'out') return movements.filter(m => m.type === 'out');
     if (filter === 'adjustments') {
       // Group adjustment, reserved, and released together
       return movements.filter(m => ['adjustment', 'reserved', 'released'].includes(m.type));
@@ -102,6 +103,7 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
           {[
             { value: 'all', label: 'All' },
             { value: 'in', label: 'Stock In' },
+            { value: 'out', label: 'Stock Out' },
             { value: 'adjustments', label: 'Adjustments' }
           ].map(({ value, label }) => (
             <button
