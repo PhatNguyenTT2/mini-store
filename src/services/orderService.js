@@ -132,6 +132,13 @@ const orderService = {
       shippingAddress: order.shippingAddress || null,
       user: order.user || null,
       items: order.items || [],
+      // Thêm các trường cần thiết cho invoice modal
+      subtotal: order.subtotal || 0,
+      discount: order.discount || 0,
+      discountPercentage: order.discountPercentage || 0,
+      discountType: order.discountType || 'none',
+      shippingFee: order.shippingFee || 0,
+      tax: order.tax || 0,
       createdAt: order.createdAt,
       updatedAt: order.updatedAt
     }))
