@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { InventoryListHeader, InventoryList } from '../components/InventoryList';
-import { StockInModal, MovementHistoryModal } from '../components/StockModals';
+import { StockInModal, AdjustStockModal, MovementHistoryModal } from '../components/StockModals';
 import inventoryService from '../services/inventoryService';
 
 const Inventories = () => {
@@ -41,8 +41,7 @@ const Inventories = () => {
 
   // Modal states
   const [stockInModal, setStockInModal] = useState({ isOpen: false, product: null });
-  // const [stockOutModal, setStockOutModal] = useState({ isOpen: false, product: null });
-  // const [adjustStockModal, setAdjustStockModal] = useState({ isOpen: false, product: null });
+  const [adjustStockModal, setAdjustStockModal] = useState({ isOpen: false, product: null });
   const [movementHistoryModal, setMovementHistoryModal] = useState({
     isOpen: false,
     productId: null,
@@ -201,11 +200,6 @@ const Inventories = () => {
     setStockInModal({ isOpen: true, product: productId });
   };
 
-  // Handle stock out
-  const handleStockOut = (productId = null) => {
-    setStockOutModal({ isOpen: true, product: productId });
-  };
-
   // Handle adjust stock
   const handleAdjust = (productId = null) => {
     setAdjustStockModal({ isOpen: true, product: productId });
@@ -242,7 +236,6 @@ const Inventories = () => {
           onSearchChange={setSearchQuery}
           onSearch={handleSearch}
           onStockIn={handleStockIn}
-          onStockOut={handleStockOut}
           onAdjust={handleAdjust}
           filterView={filterView}
           onFilterViewChange={handleFilterViewChange}
@@ -279,7 +272,6 @@ const Inventories = () => {
               sortOrder={sortOrder}
               onViewHistory={handleViewHistory}
               onStockIn={handleStockIn}
-              onStockOut={handleStockOut}
               onAdjust={handleAdjust}
             />
 
@@ -417,19 +409,12 @@ const Inventories = () => {
         preSelectedProduct={stockInModal.product}
       />
 
-      {/* <StockOutModal
-        isOpen={stockOutModal.isOpen}
-        onClose={() => setStockOutModal({ isOpen: false, product: null })}
-        onSuccess={handleStockSuccess}
-        preSelectedProduct={stockOutModal.product}
-      />
-
       <AdjustStockModal
         isOpen={adjustStockModal.isOpen}
         onClose={() => setAdjustStockModal({ isOpen: false, product: null })}
         onSuccess={handleStockSuccess}
         preSelectedProduct={adjustStockModal.product}
-      /> */}
+      />
 
       <MovementHistoryModal
         isOpen={movementHistoryModal.isOpen}

@@ -5,7 +5,7 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState('all'); // 'all', 'in', 'out', 'adjustment'
+  const [filter, setFilter] = useState('all'); // 'all', 'in', 'adjustments'
 
   useEffect(() => {
     const fetchMovements = async () => {
@@ -34,9 +34,16 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
 
   if (!isOpen) return null;
 
-  const filteredMovements = filter === 'all'
-    ? movements
-    : movements.filter(m => m.type === filter);
+  // Filter movements based on selected tab
+  const filteredMovements = (() => {
+    if (filter === 'all') return movements;
+    if (filter === 'in') return movements.filter(m => m.type === 'in');
+    if (filter === 'adjustments') {
+      // Group adjustment, reserved, and released together
+      return movements.filter(m => ['adjustment', 'reserved', 'released'].includes(m.type));
+    }
+    return movements;
+  })();
 
   const getMovementTypeBadge = (type) => {
     const badges = {
@@ -95,8 +102,7 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
           {[
             { value: 'all', label: 'All' },
             { value: 'in', label: 'Stock In' },
-            { value: 'out', label: 'Stock Out' },
-            { value: 'adjustment', label: 'Adjustments' }
+            { value: 'adjustments', label: 'Adjustments' }
           ].map(({ value, label }) => (
             <button
               key={value}
@@ -145,7 +151,30 @@ export const MovementHistoryModal = ({ isOpen, onClose, productId, productName, 
                       <div className="flex items-center gap-3 mb-2">
                         {getMovementTypeBadge(movement.type)}
                         <span className="text-[13px] font-semibold font-['Poppins',sans-serif] text-[#212529]">
-                          {movement.type === 'in' ? '+' : '-'}{movement.quantity} units
+                          {(() => {
+                            // For 'in' type: always increase
+                            if (movement.type === 'in') return `+${movement.quantity} units`;
+
+                            // For 'out' type: always decrease
+                            if (movement.type === 'out') return `-${movement.quantity} units`;
+
+                            // For 'adjustment': check adjustmentType field first, then fallback to reason
+                            if (movement.type === 'adjustment') {
+                              const isIncrease = movement.adjustmentType === 'increase' ||
+                                movement.reason?.toLowerCase().includes('increase') ||
+                                movement.reason?.toLowerCase().includes('+');
+                              return `${isIncrease ? '+' : '-'}${movement.quantity} units`;
+                            }
+
+                            // For 'reserved': decrease available
+                            if (movement.type === 'reserved') return `-${movement.quantity} units (reserved)`;
+
+                            // For 'released': increase available
+                            if (movement.type === 'released') return `+${movement.quantity} units (released)`;
+
+                            // Default
+                            return `${movement.quantity} units`;
+                          })()}
                         </span>
                         <span className="text-[12px] text-gray-500 font-['Poppins',sans-serif]">
                           {formatDate(movement.date)}

@@ -12,10 +12,14 @@ const purchaseOrderService = {
    */
   getPurchaseOrders: async (params = {}) => {
     try {
+      console.log('[purchaseOrderService] Fetching purchase orders with params:', params);
       const response = await api.get('/purchase-orders', { params })
+      console.log('[purchaseOrderService] Response status:', response.status);
+      console.log('[purchaseOrderService] Response data:', response.data);
       return response.data
     } catch (error) {
-      console.error('Error fetching purchase orders:', error)
+      console.error('[purchaseOrderService] Error fetching purchase orders:', error)
+      console.error('[purchaseOrderService] Error response:', error.response)
       throw error.response?.data || error
     }
   },
@@ -99,6 +103,49 @@ const purchaseOrderService = {
       console.error(`Error cancelling purchase order ${id}:`, error)
       throw error.response?.data || error
     }
+  },
+
+  /**
+   * Format purchase orders for display in the table
+   * @param {Array} purchaseOrders - Raw purchase orders from API
+   * @returns {Array} Formatted purchase orders
+   */
+  formatPurchaseOrdersForDisplay: (purchaseOrders) => {
+    if (!purchaseOrders || !Array.isArray(purchaseOrders)) {
+      console.warn('formatPurchaseOrdersForDisplay received invalid input:', purchaseOrders);
+      return [];
+    }
+
+    return purchaseOrders.map(po => {
+      if (!po) {
+        console.warn('Found null/undefined purchase order in array');
+        return null;
+      }
+
+      return {
+        id: po.id || po._id,
+        poNumber: po.poNumber || 'N/A',
+        supplierName: po.supplier?.companyName || 'N/A',
+        supplierCode: po.supplier?.supplierCode || '',
+        supplierId: po.supplier?.id || po.supplier?._id,
+        orderDate: po.orderDate,
+        expectedDeliveryDate: po.expectedDeliveryDate,
+        status: po.status || 'draft',
+        paymentStatus: po.paymentStatus || 'unpaid',
+        subtotal: po.subtotal || 0,
+        tax: po.tax || 0,
+        shippingFee: po.shippingFee || 0,
+        discount: po.discount || 0,
+        total: po.total || 0,
+        paidAmount: po.paidAmount || 0,
+        itemCount: po.items?.length || 0,
+        items: po.items || [],
+        createdBy: po.createdBy?.username || 'N/A',
+        createdAt: po.createdAt,
+        updatedAt: po.updatedAt,
+        notes: po.notes || ''
+      };
+    }).filter(po => po !== null);
   }
 }
 

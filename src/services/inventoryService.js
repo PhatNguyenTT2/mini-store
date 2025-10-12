@@ -127,12 +127,13 @@ const inventoryService = {
 
   /**
    * Adjust stock manually
-   * @param {Object} data - Adjustment data
+   * @param {string} productId - Product ID
+   * @param {Object} data - Adjustment data (type, quantity, adjustmentType, referenceId, referenceType, notes)
    * @returns {Promise} Updated inventory
    */
-  adjustStock: async (data) => {
+  adjustStock: async (productId, data) => {
     try {
-      const response = await api.post('/inventory/adjust', data)
+      const response = await api.post(`/inventory/${productId}/adjust`, data)
       return response.data
     } catch (error) {
       console.error('Error adjusting stock:', error)

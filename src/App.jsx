@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Dashboard, ViewProduct, DetailProduct, ListProduct, LoginSignup, Orders, Categories, Users, TestUsers, Customers, Suppliers, Inventories } from "./pages";
+import PurchaseOrders from "./pages/PurchaseOrders";
+import Payments from "./pages/Payments";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 
@@ -92,14 +94,40 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Redirect old inventory route to new structure */}
         <Route
           path="/inventories"
+          element={<Navigate to="/inventory/management" replace />}
+        />
+
+        {/* New Inventory Routes with submenu */}
+        <Route
+          path="/inventory/management"
           element={
             <ProtectedRoute>
               <Inventories />
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/inventory/purchase-orders"
+          element={
+            <ProtectedRoute>
+              <PurchaseOrders />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Payments Route - Independent page for all payment management */}
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <Payments />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </Router>
   );

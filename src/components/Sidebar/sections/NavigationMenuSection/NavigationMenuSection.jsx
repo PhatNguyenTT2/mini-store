@@ -80,10 +80,30 @@ export const NavigationMenuSection = () => {
         // { name: 'Buyer', icon: User2Icon, arrow: true },
         { name: 'Customers', icon: User, href: '/customers' },
         { name: 'Suppliers', icon: User2Icon, href: '/suppliers' },
-        { name: 'Inventories', icon: LucideStore, href: '/inventories' },
-        // { name: 'Payment', icon: DollarSign, arrow: true },
-        // { name: 'Invoices', icon: ClipboardList, arrow: true },
-        { name: 'Reports', icon: ReceiptEuro, arrow: true },
+        {
+          name: 'Inventory',
+          icon: LucideStore,
+          arrow: true,
+          submenu: [
+            { name: 'Management', href: '/inventory/management' },
+            { name: 'Purchase Orders', href: '/inventory/purchase-orders' }
+          ]
+        },
+        { name: 'Payments', icon: DollarSign, href: '/payments' },
+        {
+          name: 'Reports',
+          icon: ReceiptEuro,
+          arrow: true,
+          submenu: [
+            { name: 'Sales', href: '/reports/sales' },
+            { name: 'Inventory', href: '/reports/inventory' },
+            { name: 'Revenue', href: '/reports/revenue' },
+            { name: 'Profit', href: '/reports/profit' },
+            { name: 'Customer', href: '/reports/customer' },
+            { name: 'Supplier', href: '/reports/supplier' },
+            { name: 'Products', href: '/reports/products' },
+          ]
+        },
       ],
     },
     // {

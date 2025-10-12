@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-export const InventoryList = ({ inventory = [], onSort, sortField, sortOrder, onViewHistory, onStockIn, onStockOut, onAdjust }) => {
+export const InventoryList = ({ inventory = [], onSort, sortField, sortOrder, onViewHistory, onStockIn, onAdjust }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef(null);
@@ -111,12 +111,12 @@ export const InventoryList = ({ inventory = [], onSort, sortField, sortOrder, on
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1400px]">
+        <div className="min-w-[1200px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* SKU Column - Sortable */}
             <div
-              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[120px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('sku')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -127,7 +127,7 @@ export const InventoryList = ({ inventory = [], onSort, sortField, sortOrder, on
 
             {/* Product Name Column - Sortable */}
             <div
-              className="flex-1 min-w-[200px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
+              className="flex-1 min-w-[180px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('productName')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -211,14 +211,14 @@ export const InventoryList = ({ inventory = [], onSort, sortField, sortOrder, on
                     }`}
                 >
                   {/* SKU */}
-                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[120px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-emerald-600 leading-[20px]">
                       {item.sku}
                     </p>
                   </div>
 
                   {/* Product Name */}
-                  <div className="flex-1 min-w-[200px] px-3 flex items-center">
+                  <div className="flex-1 min-w-[180px] px-3 flex items-center">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                       {item.productName}
                     </p>
@@ -353,27 +353,12 @@ export const InventoryList = ({ inventory = [], onSort, sortField, sortOrder, on
 
             <button
               onClick={() => {
-                if (onStockOut) {
-                  onStockOut(item.productId);
-                }
-                setActiveDropdown(null);
-              }}
-              className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
-            >
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Stock Out
-            </button>
-
-            <button
-              onClick={() => {
                 if (onAdjust) {
                   onAdjust(item.productId);
                 }
                 setActiveDropdown(null);
               }}
-              className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+              className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
             >
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 8H4M12 4H8M12 12H6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
