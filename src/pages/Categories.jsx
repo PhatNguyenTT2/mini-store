@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { CategoryList, CategoryListHeader } from '../components/CategoryList';
+import { CategoryList, CategoryListHeader, AddCategoryModal, EditCategoryModal } from '../components/CategoryList';
 import categoryService from '../services/categoryService';
 
 export const Categories = () => {
@@ -15,6 +15,11 @@ export const Categories = () => {
   const [paginatedCategories, setPaginatedCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Modal states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   // Filters and sorting
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -140,15 +145,25 @@ export const Categories = () => {
   };
 
   const handleAddCategory = () => {
-    // TODO: Open modal/form to add new category
-    console.log('Add category clicked');
-    alert('Add Category functionality will be implemented soon!');
+    setShowAddModal(true);
   };
 
   const handleEdit = (category) => {
-    // TODO: Open modal/form to edit category
-    console.log('Edit category:', category);
-    alert(`Edit category: ${category.name}\nThis functionality will be implemented soon!`);
+    setSelectedCategory(category);
+    setShowEditModal(true);
+  };
+
+  const handleAddSuccess = (response) => {
+    console.log('Category created:', response);
+    fetchCategories(); // Refresh the list
+    // Optional: Show success toast notification
+  };
+
+  const handleEditSuccess = (response) => {
+    console.log('Category updated:', response);
+    fetchCategories(); // Refresh the list
+    setSelectedCategory(null);
+    // Optional: Show success toast notification
   };
 
   const handleDelete = async (category) => {
@@ -224,8 +239,8 @@ export const Categories = () => {
                     onClick={() => handlePageChange(pagination.currentPage - 1)}
                     disabled={pagination.currentPage === 1}
                     className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${pagination.currentPage === 1
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
                       }`}
                   >
                     ‹ Previous
@@ -274,8 +289,8 @@ export const Categories = () => {
                           key={page}
                           onClick={() => handlePageChange(page)}
                           className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${currentPage === page
-                              ? 'bg-[#3bb77e] text-white'
-                              : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                            ? 'bg-[#3bb77e] text-white'
+                            : 'text-[#3bb77e] hover:bg-[#def9ec]'
                             }`}
                         >
                           {page}
@@ -311,8 +326,8 @@ export const Categories = () => {
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
                     disabled={pagination.currentPage === pagination.totalPages}
                     className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${pagination.currentPage === pagination.totalPages
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
                       }`}
                   >
                     Next ›
@@ -345,6 +360,24 @@ export const Categories = () => {
           </div>
         )}
       </div>
+
+      {/* Add Category Modal */}
+      <AddCategoryModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={handleAddSuccess}
+      />
+
+      {/* Edit Category Modal */}
+      <EditCategoryModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedCategory(null);
+        }}
+        onSuccess={handleEditSuccess}
+        category={selectedCategory}
+      />
     </Layout>
   );
 };

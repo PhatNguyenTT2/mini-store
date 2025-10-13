@@ -80,17 +80,6 @@ export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, on
         <div className="min-w-[1000px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
-            {/* Order Column - Sortable */}
-            <div
-              className="w-[100px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
-              onClick={() => handleSortClick('order')}
-            >
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
-                Order
-                {getSortIcon('order')}
-              </p>
-            </div>
-
             {/* Name Column - Sortable */}
             <div
               className="flex-1 min-w-[180px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
@@ -146,13 +135,6 @@ export const CategoryList = ({ categories = [], onSort, sortField, sortOrder, on
                   key={category.id}
                   className={`flex items-center h-[60px] hover:bg-gray-50 transition-colors ${index !== categories.length - 1 ? 'border-b border-gray-100' : ''}`}
                 >
-                  {/* Order */}
-                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
-                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
-                      {category.order ?? 0}
-                    </p>
-                  </div>
-
                   {/* Name */}
                   <div className="flex-1 min-w-[180px] px-3 flex items-center">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
