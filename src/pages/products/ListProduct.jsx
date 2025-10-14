@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../../components/Layout';
 import { Breadcrumb } from '../../components/Breadcrumb';
-import { ProductList, ProductListHeader } from '../../components/ListProduct';
+import { ProductList, ProductListHeader, AddProductModal, EditProductModal } from '../../components/ListProduct';
 
 import productService from '../../services/productService';
 
@@ -18,6 +18,11 @@ const ListProduct = () => {
   const [paginatedProducts, setPaginatedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Modal states
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Filter & sort state
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -41,8 +46,8 @@ const ListProduct = () => {
     try {
       setIsLoading(true);
       setError(null);
-      // Fetch all products - set per_page to a high number or use backend's max
-      const response = await productService.getProducts({ per_page: 1000 });
+      // Fetch all products including inactive ones for admin panel
+      const response = await productService.getProducts({ per_page: 1000, include_inactive: true });
 
       // Handle different response structures
       let productData = [];
@@ -152,29 +157,79 @@ const ListProduct = () => {
   };
 
   const handleEdit = (product) => {
-    // TODO: Implement edit modal/form
-    console.log('Edit product:', product);
-    alert(`Edit functionality coming soon!\nProduct: ${product.name}`);
+    setSelectedProduct(product);
+    setShowEditModal(true);
+  };
+
+  const handleToggleActive = async (product) => {
+    const isCurrentlyActive = product.isActive !== false;
+
+    // If trying to deactivate (active -> inactive)
+    if (isCurrentlyActive) {
+      // Check if product has stock
+      if (product.stock > 0) {
+        alert(`Cannot deactivate "${product.name}" because it has ${product.stock} units in stock.\n\nPlease reduce the stock to 0 before deactivating this product.`);
+        return;
+      }
+
+      if (window.confirm(`Are you sure you want to deactivate "${product.name}"?\n\nThe product will no longer be available.`)) {
+        try {
+          await productService.updateProduct(product.id, { isActive: false });
+          fetchProducts();
+        } catch (err) {
+          console.error('Error deactivating product:', err);
+          const errorMessage = err.response?.data?.error || err.message || 'Failed to deactivate product.';
+          alert(errorMessage);
+        }
+      }
+    } else {
+      // Activating (inactive -> active)
+      if (window.confirm(`Are you sure you want to activate "${product.name}"?`)) {
+        try {
+          await productService.updateProduct(product.id, { isActive: true });
+          fetchProducts();
+        } catch (err) {
+          console.error('Error activating product:', err);
+          const errorMessage = err.response?.data?.error || err.message || 'Failed to activate product.';
+          alert(errorMessage);
+        }
+      }
+    }
   };
 
   const handleDelete = async (product) => {
-    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
+    // Check if product is active
+    if (product.isActive !== false) {
+      alert(`Cannot delete "${product.name}" because it is still active.\n\nPlease deactivate the product first before deleting.`);
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete "${product.name}"?\n\nThis action cannot be undone.`)) {
       try {
         await productService.deleteProduct(product.id);
         // Refresh the list
         fetchProducts();
-        alert('Product deleted successfully!');
       } catch (err) {
         console.error('Error deleting product:', err);
-        alert('Failed to delete product. Please try again.');
+        const errorMessage = err.response?.data?.error || err.message || 'Failed to delete product. Please try again.';
+        alert(errorMessage);
       }
     }
   };
 
   const handleAdd = () => {
-    // TODO: Implement add modal/form
-    console.log('Add new product');
-    alert('Add Product functionality coming soon!');
+    setShowAddModal(true);
+  };
+
+  const handleAddSuccess = (response) => {
+    console.log('Product created:', response);
+    fetchProducts(); // Refresh the list
+  };
+
+  const handleEditSuccess = (response) => {
+    console.log('Product updated:', response);
+    fetchProducts(); // Refresh the list
+    setSelectedProduct(null);
   };
 
   const handleExport = () => {
@@ -293,6 +348,7 @@ const ListProduct = () => {
               sortOrder={sortOrder}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleActive={handleToggleActive}
             />
 
             {/* Pagination */}
@@ -409,6 +465,24 @@ const ListProduct = () => {
           </>
         )}
       </div>
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={handleAddSuccess}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedProduct(null);
+        }}
+        onSuccess={handleEditSuccess}
+        product={selectedProduct}
+      />
     </Layout>
   );
 };

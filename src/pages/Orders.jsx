@@ -86,23 +86,7 @@ const Orders = () => {
     }
   };
 
-  // Handle payment status change
-  const handlePaymentStatusChange = async (orderId, newPaymentStatus) => {
-    try {
-      const response = await orderService.updatePaymentStatus(orderId, newPaymentStatus);
 
-      if (response.success) {
-        // Refresh orders list
-        await fetchOrders();
-
-        // Show success message
-        console.log('Payment status updated successfully');
-      }
-    } catch (err) {
-      console.error('Error updating payment status:', err);
-      alert(err.error || 'Failed to update payment status');
-    }
-  };
 
   // Handle filter changes
   const handleItemsPerPageChange = (newPerPage) => {
@@ -226,7 +210,6 @@ const Orders = () => {
             <OrderList
               orders={orders}
               onStatusChange={handleStatusChange}
-              onPaymentStatusChange={handlePaymentStatusChange}
               onEdit={(order) => setEditOrderModal(order)}
               onSort={handleColumnSort}
               sortField={sortField}

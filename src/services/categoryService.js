@@ -2,9 +2,9 @@ import api from './api'
 
 const categoryService = {
   // Get all categories
-  getCategories: async () => {
+  getCategories: async (params = {}) => {
     try {
-      const response = await api.get('/categories')
+      const response = await api.get('/categories', { params })
       return response.data
     } catch (error) {
       console.error('Get categories error:', error)

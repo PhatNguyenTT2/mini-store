@@ -97,7 +97,8 @@ export const Categories = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await categoryService.getCategories();
+      // Include inactive categories for admin panel
+      const response = await categoryService.getCategories({ include_inactive: true });
 
       // Handle response structure: { success: true, data: { categories: [...] } }
       if (response.success && response.data && response.data.categories) {
@@ -166,7 +167,39 @@ export const Categories = () => {
     // Optional: Show success toast notification
   };
 
+  const handleToggleActive = async (category) => {
+    const isCurrentlyActive = category.isActive !== false;
+    const newStatus = !isCurrentlyActive;
+
+    // Validation: Cannot deactivate if category has active products
+    if (isCurrentlyActive && category.productCount > 0) {
+      alert(`Cannot deactivate category with ${category.productCount} active product(s). Please deactivate all products in this category first.`);
+      return;
+    }
+
+    try {
+      await categoryService.updateCategory(category.id, {
+        isActive: newStatus
+      });
+      fetchCategories(); // Refresh the list
+    } catch (err) {
+      console.error('Error toggling category status:', err);
+      alert(err.response?.data?.error || err.message || 'Failed to update category status');
+    }
+  };
+
   const handleDelete = async (category) => {
+    // Validation checks
+    if (category.isActive !== false) {
+      alert('Cannot delete active category. Please deactivate it first.');
+      return;
+    }
+
+    if (category.productCount > 0) {
+      alert(`Cannot delete category with ${category.productCount} product(s). Please reassign or delete all products first.`);
+      return;
+    }
+
     if (!window.confirm(`Are you sure you want to delete "${category.name}"?`)) {
       return;
     }
@@ -177,7 +210,7 @@ export const Categories = () => {
       fetchCategories(); // Refresh the list
     } catch (err) {
       console.error('Error deleting category:', err);
-      alert(err.message || 'Failed to delete category');
+      alert(err.response?.data?.error || err.message || 'Failed to delete category');
     }
   };
 
@@ -228,6 +261,7 @@ export const Categories = () => {
               sortOrder={sortOrder}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleActive={handleToggleActive}
             />
 
             {/* Pagination */}

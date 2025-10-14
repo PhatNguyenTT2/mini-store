@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { InvoiceModal } from '../OrderModals';
 
-export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, onSort, sortField, sortOrder, onEdit }) => {
+export const OrderList = ({ orders = [], onStatusChange, onSort, sortField, sortOrder, onEdit }) => {
   const [activeDropdown, setActiveDropdown] = useState(null); // Format: 'order-{orderId}', 'payment-{orderId}', 'action-{orderId}'
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [pendingChanges, setPendingChanges] = useState({}); // Track pending changes
@@ -77,13 +77,7 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
     setActiveDropdown(null);
   };
 
-  // Handle payment status change
-  const handlePaymentStatusChange = (orderId, newPaymentStatus) => {
-    if (onPaymentStatusChange) {
-      onPaymentStatusChange(orderId, newPaymentStatus);
-    }
-    setActiveDropdown(null);
-  };
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -134,13 +128,7 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
     { value: 'cancelled', label: 'Cancelled', color: 'bg-[#ef4444]' },
   ];
 
-  // Payment status options for dropdown
-  const paymentStatusOptions = [
-    { value: 'pending', label: 'Pending', color: 'bg-[#fbbf24]' },
-    { value: 'paid', label: 'Paid', color: 'bg-[#10b981]' },
-    { value: 'failed', label: 'Failed', color: 'bg-[#ef4444]' },
-    { value: 'refunded', label: 'Refunded', color: 'bg-[#f59e0b]' },
-  ];
+
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
@@ -226,7 +214,6 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
           <div className="flex flex-col">
             {orders.map((order, index) => {
               const orderDropdownId = `order-${order.id}`;
-              const paymentDropdownId = `payment-${order.id}`;
 
               return (
                 <div
@@ -293,19 +280,15 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
                     </button>
                   </div>
 
-                  {/* Payment Status Badge with Dropdown */}
+                  {/* Payment Status Badge (Read-only) */}
                   <div className="w-[160px] px-3 flex items-center flex-shrink-0">
-                    <button
-                      onClick={(e) => toggleDropdown(paymentDropdownId, e)}
-                      className={`${getPaymentStatusStyles(order.paymentStatus)} px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity`}
+                    <span
+                      className={`${getPaymentStatusStyles(order.paymentStatus)} px-2 py-1 rounded inline-flex items-center`}
                     >
                       <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
                         {order.paymentStatus || 'pending'}
                       </span>
-                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </button>
+                    </span>
                   </div>
 
                   {/* Actions */}
@@ -351,7 +334,6 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
 
         // Determine dropdown type
         const isOrderStatus = activeDropdown === `order-${order.id}`;
-        const isPaymentStatus = activeDropdown === `payment-${order.id}`;
         const isAction = activeDropdown === `action-${order.id}`;
 
         // Render Order Status Dropdown
@@ -369,33 +351,6 @@ export const OrderList = ({ orders = [], onStatusChange, onPaymentStatusChange, 
                 <button
                   key={option.value}
                   onClick={() => handleOrderStatusChange(order.id, option.value)}
-                  className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
-                >
-                  <span className={`${option.color} w-2 h-2 rounded-full`}></span>
-                  <span className="text-[12px] font-['Poppins',sans-serif] text-[#212529] capitalize">
-                    {option.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          );
-        }
-
-        // Render Payment Status Dropdown
-        if (isPaymentStatus) {
-          return (
-            <div
-              ref={dropdownRef}
-              className="fixed min-w-[120px] bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
-              style={{
-                top: `${dropdownPosition.top}px`,
-                left: `${dropdownPosition.left}px`
-              }}
-            >
-              {paymentStatusOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handlePaymentStatusChange(order.id, option.value)}
                   className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
                 >
                   <span className={`${option.color} w-2 h-2 rounded-full`}></span>
