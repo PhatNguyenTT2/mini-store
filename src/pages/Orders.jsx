@@ -86,7 +86,35 @@ const Orders = () => {
     }
   };
 
+  // Handle delete order
+  const handleDeleteOrder = async (order) => {
+    // Validation: Check payment status
+    const allowedPaymentStatuses = ['paid', 'failed', 'refunded'];
+    const paymentStatus = order.paymentStatus.toLowerCase();
 
+    if (!allowedPaymentStatuses.includes(paymentStatus)) {
+      alert(`Cannot delete order with payment status '${order.paymentStatus}'. Only orders with payment status 'Paid', 'Failed', or 'Refunded' can be deleted.`);
+      return;
+    }
+
+    // Confirm deletion
+    if (!window.confirm(`Are you sure you want to delete order ${order.orderNumber}?\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await orderService.deleteOrder(order.id);
+
+      if (response.success) {
+        // Refresh orders list
+        await fetchOrders();
+        console.log('Order deleted successfully');
+      }
+    } catch (err) {
+      console.error('Error deleting order:', err);
+      alert(err.error || 'Failed to delete order');
+    }
+  };
 
   // Handle filter changes
   const handleItemsPerPageChange = (newPerPage) => {
@@ -211,6 +239,7 @@ const Orders = () => {
               orders={orders}
               onStatusChange={handleStatusChange}
               onEdit={(order) => setEditOrderModal(order)}
+              onDelete={handleDeleteOrder}
               onSort={handleColumnSort}
               sortField={sortField}
               sortOrder={sortOrder}

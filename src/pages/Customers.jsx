@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layout } from '../components/Layout';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { CustomerListHeader, CustomerList } from '../components/CustomerList';
+import { CustomerListHeader, CustomerList, AddCustomerModal, EditCustomerModal } from '../components/CustomerList';
 import customerService from '../services/customerService';
 
 const Customers = () => {
@@ -34,6 +34,11 @@ const Customers = () => {
   // Sort state
   const [sortField, setSortField] = useState('customerCode');
   const [sortOrder, setSortOrder] = useState('asc');
+
+  // Modal states
+  const [addCustomerModal, setAddCustomerModal] = useState(false);
+  const [editCustomerModal, setEditCustomerModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   // Fetch customers from API
   const fetchCustomers = async () => {
@@ -135,10 +140,70 @@ const Customers = () => {
     setCustomers(sorted);
   };
 
+  // Handle toggle active status
+  const handleToggleActive = async (customer) => {
+    const newStatus = !customer.isActive;
+
+    try {
+      const response = await customerService.toggleCustomerStatus(customer.id, newStatus);
+
+      if (response) {
+        // Refresh customer list
+        await fetchCustomers();
+        console.log(`Customer ${customer.customerCode} status updated to ${newStatus ? 'active' : 'inactive'}`);
+      }
+    } catch (err) {
+      console.error('Error toggling customer status:', err);
+      alert(err.error || 'Failed to update customer status');
+    }
+  };
+
   // Handle add customer
   const handleAddCustomer = () => {
-    console.log('Add new customer clicked');
-    alert('Add Customer functionality will be implemented soon!');
+    setAddCustomerModal(true);
+  };
+
+  // Handle edit customer
+  const handleEditCustomer = (customer) => {
+    setSelectedCustomer(customer);
+    setEditCustomerModal(true);
+  };
+
+  // Handle customer created successfully
+  const handleCustomerSuccess = (data) => {
+    console.log('Customer created successfully:', data);
+    fetchCustomers(); // Refresh list
+  };
+
+  // Handle customer updated successfully
+  const handleCustomerUpdateSuccess = (data) => {
+    console.log('Customer updated successfully:', data);
+    fetchCustomers(); // Refresh list
+    setSelectedCustomer(null);
+  };
+
+  // Handle delete customer
+  const handleDeleteCustomer = async (customer) => {
+    // Validate on client-side: Only inactive customers can be deleted
+    if (customer.isActive) {
+      alert('Cannot delete active customer. Please deactivate the customer first.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete customer ${customer.customerCode}?\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await customerService.deleteCustomer(customer.id);
+      console.log('Customer deleted successfully');
+      fetchCustomers(); // Refresh list
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      alert(error.response?.data?.error || error.message || 'Failed to delete customer');
+    }
   };
 
   return (
@@ -186,6 +251,9 @@ const Customers = () => {
               onSort={handleColumnSort}
               sortField={sortField}
               sortOrder={sortOrder}
+              onToggleActive={handleToggleActive}
+              onEdit={handleEditCustomer}
+              onDelete={handleDeleteCustomer}
             />
 
             {/* Pagination */}
@@ -197,8 +265,8 @@ const Customers = () => {
                     onClick={() => setFilters({ ...filters, page: pagination.current_page - 1 })}
                     disabled={!pagination.has_prev}
                     className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${!pagination.has_prev
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
                       }`}
                   >
                     ‹ Previous
@@ -246,8 +314,8 @@ const Customers = () => {
                           key={page}
                           onClick={() => setFilters({ ...filters, page })}
                           className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${currentPage === page
-                              ? 'bg-[#3bb77e] text-white'
-                              : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                            ? 'bg-[#3bb77e] text-white'
+                            : 'text-[#3bb77e] hover:bg-[#def9ec]'
                             }`}
                         >
                           {page}
@@ -283,8 +351,8 @@ const Customers = () => {
                     onClick={() => setFilters({ ...filters, page: pagination.current_page + 1 })}
                     disabled={!pagination.has_next}
                     className={`px-3 py-2 rounded transition-colors text-[12px] font-['Poppins',sans-serif] ${!pagination.has_next
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-[#3bb77e] hover:bg-[#def9ec]'
+                      ? 'text-gray-400 cursor-not-allowed'
+                      : 'text-[#3bb77e] hover:bg-[#def9ec]'
                       }`}
                   >
                     Next ›
@@ -312,6 +380,24 @@ const Customers = () => {
             )}
           </>
         )}
+
+        {/* Add Customer Modal */}
+        <AddCustomerModal
+          isOpen={addCustomerModal}
+          onClose={() => setAddCustomerModal(false)}
+          onSuccess={handleCustomerSuccess}
+        />
+
+        {/* Edit Customer Modal */}
+        <EditCustomerModal
+          isOpen={editCustomerModal}
+          onClose={() => {
+            setEditCustomerModal(false);
+            setSelectedCustomer(null);
+          }}
+          onSuccess={handleCustomerUpdateSuccess}
+          customer={selectedCustomer}
+        />
       </div>
     </Layout>
   );

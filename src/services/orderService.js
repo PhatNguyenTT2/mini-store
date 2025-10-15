@@ -107,6 +107,21 @@ const orderService = {
   },
 
   /**
+   * Delete an order
+   * @param {string} id - Order ID
+   * @returns {Promise} Delete response
+   */
+  deleteOrder: async (id) => {
+    try {
+      const response = await api.delete(`/orders/${id}`)
+      return response.data
+    } catch (error) {
+      console.error(`Error deleting order ${id}:`, error)
+      throw error.response?.data || error
+    }
+  },
+
+  /**
    * Format orders data for display in the table
    * @param {Array} orders - Raw orders from API
    * @returns {Array} Formatted orders

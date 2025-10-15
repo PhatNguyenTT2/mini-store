@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { InvoiceModal } from '../OrderModals';
 
-export const OrderList = ({ orders = [], onStatusChange, onSort, sortField, sortOrder, onEdit }) => {
+export const OrderList = ({ orders = [], onStatusChange, onSort, sortField, sortOrder, onEdit, onDelete }) => {
   const [activeDropdown, setActiveDropdown] = useState(null); // Format: 'order-{orderId}', 'payment-{orderId}', 'action-{orderId}'
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [pendingChanges, setPendingChanges] = useState({}); // Track pending changes
@@ -407,12 +407,21 @@ export const OrderList = ({ orders = [], onStatusChange, onSort, sortField, sort
 
               <button
                 onClick={() => {
-                  if (window.confirm(`Are you sure you want to delete order ${order.orderNumber}?`)) {
-                    console.log('Delete order:', order.id);
+                  if (onDelete) {
+                    onDelete(order);
                   }
                   setActiveDropdown(null);
                 }}
-                className="w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
+                disabled={!['paid', 'failed', 'refunded'].includes(order.paymentStatus.toLowerCase())}
+                className={`w-full px-4 py-2 text-left text-[12px] font-['Poppins',sans-serif] transition-colors flex items-center gap-2 ${!['paid', 'failed', 'refunded'].includes(order.paymentStatus.toLowerCase())
+                    ? 'text-gray-400 cursor-not-allowed opacity-50'
+                    : 'text-gray-700 hover:bg-red-50 hover:text-red-600'
+                  }`}
+                title={
+                  !['paid', 'failed', 'refunded'].includes(order.paymentStatus.toLowerCase())
+                    ? "Can only delete orders with payment status 'Paid', 'Failed', or 'Refunded'"
+                    : 'Delete order'
+                }
               >
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

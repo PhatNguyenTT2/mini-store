@@ -88,6 +88,22 @@ const customerService = {
   },
 
   /**
+   * Toggle customer active status
+   * @param {string} id - Customer ID
+   * @param {boolean} isActive - New active status
+   * @returns {Promise} Updated customer
+   */
+  toggleCustomerStatus: async (id, isActive) => {
+    try {
+      const response = await api.patch(`/customers/${id}/status`, { isActive })
+      return response.data
+    } catch (error) {
+      console.error(`Error toggling customer status ${id}:`, error)
+      throw error.response?.data || error
+    }
+  },
+
+  /**
    * Format customers data for display in the table
    * @param {Array} customers - Raw customers from API
    * @returns {Array} Formatted customers
@@ -97,12 +113,13 @@ const customerService = {
       id: customer.id || customer._id,
       customerCode: customer.customerCode,
       fullName: customer.fullName,
-      email: customer.email,
+      email: customer.email || null,
       phone: customer.phone || null,
-      address: customer.address?.city || null,
+      address: customer.address || null, // Keep full address object
       dob: customer.dateOfBirth || customer.dob || null, // Backend uses dateOfBirth
       gender: customer.gender || null,
       customerType: customer.customerType || 'Regular',
+      isActive: customer.isActive !== undefined ? customer.isActive : true,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt
     }))
