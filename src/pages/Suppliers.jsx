@@ -35,6 +35,9 @@ const Suppliers = () => {
   const [sortField, setSortField] = useState('supplierCode');
   const [sortOrder, setSortOrder] = useState('asc');
 
+  // Add Supplier Modal state
+  const [addOpen, setAddOpen] = useState(false);
+
   // Fetch suppliers from API
   const fetchSuppliers = async () => {
     try {
@@ -147,8 +150,12 @@ const Suppliers = () => {
 
   // Handle add supplier
   const handleAddSupplier = () => {
-    console.log('Add new supplier clicked');
-    alert('Add Supplier functionality will be implemented soon!');
+    setAddOpen(true);
+  };
+
+  const handleAddSuccess = () => {
+    setAddOpen(false);
+    fetchSuppliers();
   };
 
   return (
@@ -196,6 +203,9 @@ const Suppliers = () => {
               onSort={handleColumnSort}
               sortField={sortField}
               sortOrder={sortOrder}
+              addModalOpen={addOpen}
+              onCloseAddModal={() => setAddOpen(false)}
+              onAddSuccess={handleAddSuccess}
             />
 
             {/* Pagination */}

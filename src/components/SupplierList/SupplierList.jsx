@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { AddSupplierModal } from './AddSupplierModal';
 
-export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder }) => {
+export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, addModalOpen = false, onCloseAddModal, onAddSuccess }) => {
   const [activeDropdown, setActiveDropdown] = useState(null); // Format: 'action-{supplierId}'
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef(null);
@@ -86,11 +87,23 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder }) =
     return 'text-blue-600';
   };
 
+  // Format address as "street, city" when nested object is provided
+  const formatAddress = (supplier) => {
+    const addr = supplier.address;
+    if (!addr) return 'N/A';
+    // If already a string from formatter
+    if (typeof addr === 'string') return addr || 'N/A';
+    const street = addr.street?.trim() || '';
+    const city = addr.city?.trim() || '';
+    const combined = [street, city].filter(Boolean).join(', ');
+    return combined || 'N/A';
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container - overflow-x-auto allows horizontal scroll */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1170px]">
+        <div className="min-w-[1290px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* ID Column - Sortable */}
@@ -126,8 +139,19 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder }) =
               </p>
             </div>
 
+            {/* Phone Column - Sortable */}
+            <div
+              className="w-[160px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('phone')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
+                Phone
+                {getSortIcon('phone')}
+              </p>
+            </div>
+
             {/* Address Column */}
-            <div className="flex-1 min-w-[200px] px-3 flex items-center">
+            <div className="flex-1 min-w-[240px] px-3 flex items-center">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
                 Address
               </p>
@@ -193,10 +217,17 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder }) =
                     </p>
                   </div>
 
-                  {/* Address */}
-                  <div className="flex-1 min-w-[200px] px-3 flex items-center">
+                  {/* Phone */}
+                  <div className="w-[160px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
-                      {supplier.address || 'N/A'}
+                      {supplier.phone || 'N/A'}
+                    </p>
+                  </div>
+
+                  {/* Address */}
+                  <div className="flex-1 min-w-[240px] px-3 flex items-center">
+                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
+                      {formatAddress(supplier)}
                     </p>
                   </div>
 
@@ -308,6 +339,13 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder }) =
           </div>
         );
       })()}
+
+      {/* Add Supplier Modal (controlled by parent) */}
+      <AddSupplierModal
+        isOpen={addModalOpen}
+        onClose={onCloseAddModal}
+        onSuccess={onAddSuccess}
+      />
     </div>
   );
 };

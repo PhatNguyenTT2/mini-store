@@ -90,6 +90,16 @@ const PurchaseOrderList = ({
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
+  // Payment status badge styles
+  const getPaymentStatusStyles = (status) => {
+    const map = {
+      unpaid: 'bg-[#ef4444]',
+      partial: 'bg-[#f59e0b]',
+      paid: 'bg-[#10b981]'
+    };
+    return map[(status || '').toLowerCase()] || 'bg-gray-500';
+  };
+
   // Action handlers
   const handleView = (po) => {
     console.log('View PO:', po);
@@ -115,7 +125,7 @@ const PurchaseOrderList = ({
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1200px]">
+        <div className="min-w-[1320px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* ID Column - Sortable (displays poNumber) */}
@@ -151,6 +161,13 @@ const PurchaseOrderList = ({
               </p>
             </div>
 
+            {/* Items Column */}
+            <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+                ITEMS
+              </p>
+            </div>
+
             {/* Total Column - Sortable */}
             <div
               className="w-[130px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
@@ -162,17 +179,10 @@ const PurchaseOrderList = ({
               </p>
             </div>
 
-            {/* Items Column */}
-            <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
+            {/* Paid Amount Column */}
+            <div className="w-[130px] px-3 flex items-center flex-shrink-0">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
-                ITEMS
-              </p>
-            </div>
-
-            {/* Notes Column */}
-            <div className="flex-1 min-w-[200px] px-3 flex items-center flex-shrink-0">
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
-                NOTES
+                PAID AMOUNT
               </p>
             </div>
 
@@ -184,6 +194,20 @@ const PurchaseOrderList = ({
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 ORDER DATE
                 {getSortIcon('orderDate')}
+              </p>
+            </div>
+
+            {/* Payment Status Column */}
+            <div className="w-[140px] px-3 flex items-center flex-shrink-0">
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+                STATUS
+              </p>
+            </div>
+
+            {/* Created By Column */}
+            <div className="w-[180px] px-3 flex items-center flex-shrink-0">
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
+                CREATED BY
               </p>
             </div>
 
@@ -230,13 +254,6 @@ const PurchaseOrderList = ({
                     </p>
                   </div>
 
-                  {/* Total */}
-                  <div className="w-[130px] px-3 flex items-center flex-shrink-0">
-                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
-                      {formatCurrency(po.total)}
-                    </p>
-                  </div>
-
                   {/* Items - View Icon */}
                   <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
                     <button
@@ -253,10 +270,17 @@ const PurchaseOrderList = ({
                     </button>
                   </div>
 
-                  {/* Notes */}
-                  <div className="flex-1 min-w-[200px] px-3 flex items-center flex-shrink-0">
-                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#6c757d] leading-[20px] truncate">
-                      {po.notes || '-'}
+                  {/* Total */}
+                  <div className="w-[130px] px-3 flex items-center flex-shrink-0">
+                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
+                      {formatCurrency(po.total)}
+                    </p>
+                  </div>
+
+                  {/* Paid Amount */}
+                  <div className="w-[130px] px-3 flex items-center flex-shrink-0">
+                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
+                      {formatCurrency(po.paidAmount)}
                     </p>
                   </div>
 
@@ -264,6 +288,22 @@ const PurchaseOrderList = ({
                   <div className="w-[130px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
                       {formatDate(po.orderDate)}
+                    </p>
+                  </div>
+
+                  {/* Payment Status */}
+                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
+                    <div className={`${getPaymentStatusStyles(po.paymentStatus)} inline-flex px-2 py-1 rounded`}>
+                      <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
+                        {po.paymentStatus || 'unpaid'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Created By */}
+                  <div className="w-[180px] px-3 flex items-center flex-shrink-0">
+                    <p className="text-[12px] font-['Poppins',sans-serif] text-[#6c757d] leading-[18px] truncate">
+                      {po.createdBy || 'N/A'}
                     </p>
                   </div>
 

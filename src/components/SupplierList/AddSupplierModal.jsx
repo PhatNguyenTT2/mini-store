@@ -12,7 +12,8 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
     accountNumber: '',
     paymentTerms: 'net30',
     creditLimit: '0',
-    currentDebt: '0'
+    currentDebt: '0',
+    notes: ''
   })
 
   const [loading, setLoading] = useState(false)
@@ -30,7 +31,8 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
         accountNumber: '',
         paymentTerms: 'net30',
         creditLimit: '0',
-        currentDebt: '0'
+        currentDebt: '0',
+        notes: ''
       })
       setError(null)
     }
@@ -113,6 +115,10 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
           bankName: formData.bankName.trim() || '',
           accountNumber: formData.accountNumber.trim() || ''
         }
+      }
+
+      if (formData.notes.trim()) {
+        payload.notes = formData.notes.trim()
       }
 
       const created = await supplierService.createSupplier(payload)
@@ -283,6 +289,29 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
                 onChange={(e) => handleChange('currentDebt', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-[13px] font-['Poppins',sans-serif] focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
+            </div>
+          </div>
+
+          {/* Notes (Optional) */}
+          <div>
+            <label className="block text-[13px] font-medium font-['Poppins',sans-serif] text-[#212529] mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => handleChange('notes', e.target.value)}
+              placeholder="Additional notes about the supplier (optional)"
+              rows={4}
+              maxLength={1000}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-[13px] font-['Poppins',sans-serif] focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+            />
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-[11px] text-gray-500 font-['Poppins',sans-serif]">
+                Maximum 1000 characters
+              </p>
+              <p className="text-[11px] text-gray-500 font-['Poppins',sans-serif]">
+                {formData.notes.length}/1000
+              </p>
             </div>
           </div>
 
