@@ -106,6 +106,21 @@ const purchaseOrderService = {
   },
 
   /**
+   * Delete purchase order
+   * @param {string} id - Purchase Order ID
+   * @returns {Promise} Deleted purchase order
+   */
+  deletePurchaseOrder: async (id) => {
+    try {
+      const response = await api.delete(`/purchase-orders/${id}`)
+      return response.data
+    } catch (error) {
+      console.error(`Error deleting purchase order ${id}:`, error)
+      throw error.response?.data || error
+    }
+  },
+
+  /**
    * Format purchase orders for display in the table
    * @param {Array} purchaseOrders - Raw purchase orders from API
    * @returns {Array} Formatted purchase orders
@@ -130,7 +145,7 @@ const purchaseOrderService = {
         supplierId: po.supplier?.id || po.supplier?._id,
         orderDate: po.orderDate,
         expectedDeliveryDate: po.expectedDeliveryDate,
-        status: po.status || 'draft',
+        status: po.status || 'pending',
         paymentStatus: po.paymentStatus || 'unpaid',
         subtotal: po.subtotal || 0,
         tax: po.tax || 0,

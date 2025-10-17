@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import supplierService from '../../services/supplierService'
 
-export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
+export const EditSupplierModal = ({ isOpen, onClose, onSuccess, supplier }) => {
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
@@ -19,24 +19,25 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // Populate form when supplier changes or modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && supplier) {
       setFormData({
-        companyName: '',
-        email: '',
-        phone: '',
-        street: '',
-        city: '',
-        bankName: '',
-        accountNumber: '',
-        paymentTerms: 'net30',
-        creditLimit: '0',
-        currentDebt: '0',
-        notes: ''
+        companyName: supplier.companyName || '',
+        email: supplier.email || '',
+        phone: supplier.phone || '',
+        street: supplier.address?.street || supplier.addressStreet || '',
+        city: supplier.address?.city || supplier.addressCity || '',
+        bankName: supplier.bankAccount?.bankName || '',
+        accountNumber: supplier.bankAccount?.accountNumber || '',
+        paymentTerms: supplier.paymentTerms || 'net30',
+        creditLimit: String(supplier.creditLimit || 0),
+        currentDebt: String(supplier.currentDebt || 0),
+        notes: supplier.notes || ''
       })
       setError(null)
     }
-  }, [isOpen])
+  }, [isOpen, supplier])
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -121,26 +122,32 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
         payload.notes = formData.notes.trim()
       }
 
-      const created = await supplierService.createSupplier(payload)
-      if (onSuccess) onSuccess(created)
+      const updated = await supplierService.updateSupplier(supplier.id, payload)
+      if (onSuccess) onSuccess(updated)
       onClose && onClose()
     } catch (err) {
-      console.error('Error creating supplier:', err)
+      console.error('Error updating supplier:', err)
       setError(
-        err.response?.data?.error || err.error || err.message || 'Failed to create supplier. Please try again.'
+        err.response?.data?.error || err.error || err.message || 'Failed to update supplier. Please try again.'
       )
     } finally {
       setLoading(false)
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen || !supplier) return null
+
+  // Format currency for display
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return '$0'
+    return `$${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-[20px] font-semibold font-['Poppins',sans-serif] text-[#212529]">Add Supplier</h2>
+          <h2 className="text-[20px] font-semibold font-['Poppins',sans-serif] text-[#212529]">Edit Supplier</h2>
           <button
             onClick={onClose}
             disabled={loading}
@@ -299,13 +306,13 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
             </label>
             <input
               type="text"
-              value="$0"
+              value={formatCurrency(supplier.totalPurchaseAmount || 0)}
               readOnly
               disabled
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-[13px] font-['Poppins',sans-serif] bg-gray-50 text-gray-500 cursor-not-allowed"
             />
             <p className="text-[11px] text-gray-500 font-['Poppins',sans-serif] mt-1">
-              This field will be automatically calculated from purchase orders
+              This field is automatically calculated from purchase orders
             </p>
           </div>
 
@@ -352,10 +359,10 @@ export const AddSupplierModal = ({ isOpen, onClose, onSuccess }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Creating...
+                  Updating...
                 </>
               ) : (
-                'Create Supplier'
+                'Update Supplier'
               )}
             </button>
           </div>

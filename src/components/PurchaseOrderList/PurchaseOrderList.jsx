@@ -1,16 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
+import { EditPurchaseOrderModal } from './EditPurchaseOrderModal';
+import purchaseOrderService from '../../services/purchaseOrderService';
+import inventoryService from '../../services/inventoryService';
 
 const PurchaseOrderList = ({
   purchaseOrders = [],
   onSort,
   sortField,
-  sortOrder
+  sortOrder,
+  onRefresh
 }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const dropdownRef = useRef(null);
 
   const [viewItemsModal, setViewItemsModal] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingPO, setEditingPO] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Handle sort click
   const handleSortClick = (field) => {
@@ -50,7 +57,15 @@ const PurchaseOrderList = ({
       setActiveDropdown(null);
     } else {
       const buttonRect = event.currentTarget.getBoundingClientRect();
-      const leftPosition = buttonRect.right - 160;
+      let leftPosition;
+
+      // Status dropdown: align left
+      if (dropdownId.startsWith('status-')) {
+        leftPosition = buttonRect.left;
+      } else {
+        // Actions dropdown: align right
+        leftPosition = buttonRect.right - 160;
+      }
 
       setDropdownPosition({
         top: buttonRect.bottom + 4,
@@ -90,47 +105,128 @@ const PurchaseOrderList = ({
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
-  // Payment status badge styles
-  const getPaymentStatusStyles = (status) => {
+  // PO status badge styles
+  const getStatusStyles = (status) => {
     const map = {
-      unpaid: 'bg-[#ef4444]',
-      partial: 'bg-[#f59e0b]',
-      paid: 'bg-[#10b981]'
+      pending: 'bg-[#f59e0b]',         // Orange - Pending
+      approved: 'bg-[#3b82f6]',        // Blue - Approved
+      received: 'bg-[#10b981]',        // Green - Received
+      cancelled: 'bg-[#ef4444]'        // Red - Cancelled
     };
-    return map[(status || '').toLowerCase()] || 'bg-gray-500';
+    return map[(status || '').toLowerCase()] || 'bg-[#6b7280]';
   };
 
   // Action handlers
-  const handleView = (po) => {
-    console.log('View PO:', po);
-    // TODO: Open view modal
-  };
-
   const handleEdit = (po) => {
-    console.log('Edit PO:', po);
-    // TODO: Open edit modal
+    setEditingPO(po);
+    setEditModalOpen(true);
   };
 
-  const handleReceive = (po) => {
-    console.log('Receive items for PO:', po);
-    // TODO: Open receive items modal
+  const handleDelete = async (po) => {
+    if (po.paymentStatus !== 'paid') {
+      alert('Cannot delete purchase order. Only paid purchase orders can be deleted.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete Purchase Order ${po.poNumber}?\n\nThis action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await purchaseOrderService.deletePurchaseOrder(po.id);
+      alert('Purchase order deleted successfully');
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error deleting purchase order:', error);
+      alert(error.error || error.message || 'Failed to delete purchase order');
+    }
   };
 
-  const handleCancel = (po) => {
-    console.log('Cancel PO:', po);
-    // TODO: Open cancel confirmation
+  // Handle status change
+  const handleStatusChange = async (po, newStatus) => {
+    if (updatingStatus) return;
+
+    const oldStatus = po.status;
+
+    // Confirm critical status changes
+    if (newStatus === 'approved' || newStatus === 'received') {
+      const action = newStatus === 'approved' ? 'approve' : 'mark as received';
+      const confirmed = window.confirm(
+        `Are you sure you want to ${action} Purchase Order ${po.poNumber}?${newStatus === 'approved' ? '\n\nThis will update inventory stock levels.' :
+          newStatus === 'received' ? '\n\nThis will mark all items as received and update stock.' : ''
+        }`
+      );
+
+      if (!confirmed) {
+        setActiveDropdown(null);
+        return;
+      }
+    }
+
+    setUpdatingStatus(true);
+    setActiveDropdown(null);
+
+    try {
+      // Update PO status
+      await purchaseOrderService.updatePurchaseOrder(po.id, { status: newStatus });
+
+      // If status changed to approved or received, update inventory
+      if ((newStatus === 'approved' || newStatus === 'received') &&
+        (oldStatus !== 'approved' && oldStatus !== 'received')) {
+
+        console.log(`Status changed to ${newStatus}, updating inventory...`);
+
+        // Stock in all items
+        if (po.items && po.items.length > 0) {
+          for (const item of po.items) {
+            const productId = item.product?.id || item.product?._id || item.product;
+            const quantity = item.quantity || 0;
+
+            if (productId && quantity > 0) {
+              try {
+                await inventoryService.stockIn({
+                  product: productId,
+                  quantity: quantity,
+                  referenceType: 'purchase_order',
+                  referenceId: po.poNumber,
+                  reason: `Purchase Order ${newStatus === 'approved' ? 'Approved' : 'Received'}: ${po.poNumber}`,
+                  notes: `Auto stock-in when PO status changed to ${newStatus}`
+                });
+                console.log(`Stocked in ${quantity} units of product ${productId}`);
+              } catch (stockError) {
+                console.error(`Error stocking in product ${productId}:`, stockError);
+              }
+            }
+          }
+        }
+      }
+
+      alert(`Purchase Order status updated to ${newStatus}`);
+      if (onRefresh) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error updating purchase order status:', error);
+      alert(error.error || error.message || 'Failed to update status');
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   return (
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1320px]">
+        <div className="min-w-[1000px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* ID Column - Sortable (displays poNumber) */}
             <div
-              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[100px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('poNumber')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -141,7 +237,7 @@ const PurchaseOrderList = ({
 
             {/* Supplier Column - Sortable */}
             <div
-              className="flex-1 min-w-[180px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
+              className="flex-1 min-w-[120px] px-3 flex items-center cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('supplier')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -150,19 +246,8 @@ const PurchaseOrderList = ({
               </p>
             </div>
 
-            {/* Delivery Date Column - Sortable */}
-            <div
-              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
-              onClick={() => handleSortClick('expectedDeliveryDate')}
-            >
-              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
-                DELIVERY DATE
-                {getSortIcon('expectedDeliveryDate')}
-              </p>
-            </div>
-
             {/* Items Column */}
-            <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
+            <div className="w-[80px] px-3 flex items-center justify-center flex-shrink-0">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
                 ITEMS
               </p>
@@ -170,7 +255,7 @@ const PurchaseOrderList = ({
 
             {/* Total Column - Sortable */}
             <div
-              className="w-[130px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[100px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('total')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -180,32 +265,43 @@ const PurchaseOrderList = ({
             </div>
 
             {/* Paid Amount Column */}
-            <div className="w-[130px] px-3 flex items-center flex-shrink-0">
+            <div className="w-[100px] px-3 flex items-center flex-shrink-0">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
-                PAID AMOUNT
+                PAID
               </p>
             </div>
 
             {/* Order Date Column - Sortable */}
             <div
-              className="w-[130px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[100px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('orderDate')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
-                ORDER DATE
+                DATE
                 {getSortIcon('orderDate')}
               </p>
             </div>
 
+            {/* Delivery Date Column - Sortable */}
+            <div
+              className="w-[100px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('expectedDeliveryDate')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
+                DELIVERY
+                {getSortIcon('expectedDeliveryDate')}
+              </p>
+            </div>
+
             {/* Payment Status Column */}
-            <div className="w-[140px] px-3 flex items-center flex-shrink-0">
+            <div className="w-[100px] px-3 flex items-center flex-shrink-0">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
                 STATUS
               </p>
             </div>
 
             {/* Created By Column */}
-            <div className="w-[180px] px-3 flex items-center flex-shrink-0">
+            <div className="w-[120px] px-3 flex items-center flex-shrink-0">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
                 CREATED BY
               </p>
@@ -229,14 +325,14 @@ const PurchaseOrderList = ({
                     }`}
                 >
                   {/* PO Number */}
-                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-emerald-600 leading-[20px]">
                       {po.poNumber}
                     </p>
                   </div>
 
                   {/* Supplier */}
-                  <div className="flex-1 min-w-[180px] px-3 flex items-center">
+                  <div className="flex-1 min-w-[120px] px-3 flex items-center">
                     <div>
                       <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                         {po.supplierName}
@@ -247,15 +343,8 @@ const PurchaseOrderList = ({
                     </div>
                   </div>
 
-                  {/* Delivery Date */}
-                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
-                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
-                      {formatDate(po.expectedDeliveryDate)}
-                    </p>
-                  </div>
-
                   {/* Items - View Icon */}
-                  <div className="w-[100px] px-3 flex items-center justify-center flex-shrink-0">
+                  <div className="w-[80px] px-3 flex items-center justify-center flex-shrink-0">
                     <button
                       onClick={() => setViewItemsModal(po)}
                       className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 transition-colors"
@@ -271,37 +360,51 @@ const PurchaseOrderList = ({
                   </div>
 
                   {/* Total */}
-                  <div className="w-[130px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
                       {formatCurrency(po.total)}
                     </p>
                   </div>
 
                   {/* Paid Amount */}
-                  <div className="w-[130px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
                       {formatCurrency(po.paidAmount)}
                     </p>
                   </div>
 
                   {/* Order Date */}
-                  <div className="w-[130px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
                       {formatDate(po.orderDate)}
                     </p>
                   </div>
 
-                  {/* Payment Status */}
-                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
-                    <div className={`${getPaymentStatusStyles(po.paymentStatus)} inline-flex px-2 py-1 rounded`}>
+                  {/* Delivery Date */}
+                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
+                    <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px]">
+                      {formatDate(po.expectedDeliveryDate)}
+                    </p>
+                  </div>
+
+                  {/* PO Status - Dropdown */}
+                  <div className="w-[100px] px-3 flex items-center flex-shrink-0">
+                    <button
+                      onClick={(e) => toggleDropdown(`status-${po.id}`, e)}
+                      disabled={updatingStatus}
+                      className={`${getStatusStyles(po.status)} px-2 py-1 rounded inline-flex items-center gap-1 cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
                       <span className="text-[9px] font-bold font-['Poppins',sans-serif] text-white leading-[10px] uppercase">
-                        {po.paymentStatus || 'unpaid'}
+                        {po.status ? po.status.replace('_', ' ') : 'pending'}
                       </span>
-                    </div>
+                      <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 1L4 4L7 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
                   </div>
 
                   {/* Created By */}
-                  <div className="w-[180px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[120px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[12px] font-['Poppins',sans-serif] text-[#6c757d] leading-[18px] truncate">
                       {po.createdBy || 'N/A'}
                     </p>
@@ -340,12 +443,55 @@ const PurchaseOrderList = ({
       {/* Fixed Position Dropdown Menus */}
       {activeDropdown && (() => {
         const po = purchaseOrders.find(p =>
-          activeDropdown === `action-${p.id}`
+          activeDropdown === `action-${p.id}` || activeDropdown === `status-${p.id}`
         );
 
         if (!po) return null;
 
         const isAction = activeDropdown === `action-${po.id}`;
+        const isStatus = activeDropdown === `status-${po.id}`;
+
+        // Status Dropdown
+        if (isStatus) {
+          const statusOptions = [
+            { value: 'pending', label: 'Pending', color: 'bg-[#f59e0b]' },
+            { value: 'approved', label: 'Approved', color: 'bg-[#3b82f6]' },
+            { value: 'received', label: 'Received', color: 'bg-[#10b981]' },
+            { value: 'cancelled', label: 'Cancelled', color: 'bg-[#ef4444]' }
+          ];
+
+          return (
+            <div
+              ref={dropdownRef}
+              className="fixed min-w-[180px] bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-[9999]"
+              style={{
+                top: `${dropdownPosition.top}px`,
+                left: `${dropdownPosition.left}px`
+              }}
+            >
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleStatusChange(po, option.value)}
+                  disabled={updatingStatus}
+                  className={`w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${po.status === option.value ? 'bg-gray-50' : ''
+                    }`}
+                >
+                  <span className={`${option.color} w-2 h-2 rounded-full`}></span>
+                  <span className={`text-[12px] font-['Poppins',sans-serif] ${po.status === option.value ? 'text-emerald-600 font-semibold' : 'text-[#212529]'
+                    }`}>
+                    {option.label}
+                  </span>
+                  {po.status === option.value && (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-auto">
+                      <path d="M10 3L4.5 8.5L2 6" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          );
+        }
 
         // Actions Dropdown
         if (isAction) {
@@ -360,43 +506,34 @@ const PurchaseOrderList = ({
             >
               <button
                 onClick={() => {
-                  handleView(po);
-                  setActiveDropdown(null);
-                }}
-                className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 3C4.5 3 2 8 2 8s2.5 5 6 5 6-5 6-5-2.5-5-6-5z" stroke="currentColor" strokeWidth="1.5" />
-                  <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
-                <span className="text-[12px] font-['Poppins',sans-serif] text-gray-700">View Details</span>
-              </button>
-
-              <button
-                onClick={() => {
                   handleEdit(po);
                   setActiveDropdown(null);
                 }}
-                className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors flex items-center gap-2"
+                className="w-full px-3 py-2 text-left hover:bg-blue-50 hover:text-blue-600 transition-colors flex items-center gap-2"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M11 2L14 5L5 14H2V11L11 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
                 </svg>
-                <span className="text-[12px] font-['Poppins',sans-serif] text-gray-700">Edit</span>
+                <span className="text-[12px] font-['Poppins',sans-serif]">Edit</span>
               </button>
 
               <div className="border-t border-gray-200 my-1"></div>
 
               <button
                 onClick={() => {
-                  handleCancel(po);
+                  handleDelete(po);
                   setActiveDropdown(null);
                 }}
-                className="w-full px-3 py-2 text-left hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
+                disabled={po.paymentStatus !== 'paid'}
+                className={`w-full px-3 py-2 text-left transition-colors flex items-center gap-2 ${po.paymentStatus !== 'paid'
+                  ? 'text-gray-400 cursor-not-allowed opacity-50'
+                  : 'hover:bg-red-50 hover:text-red-600 text-gray-700'
+                  }`}
+                title={po.paymentStatus !== 'paid' ? 'Only paid purchase orders can be deleted' : 'Delete purchase order'}
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.5" />
-                  <path d="M10 6L6 10M6 6L10 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                  <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5.33301 4.00004V2.66671C5.33301 2.31309 5.47348 1.97395 5.72353 1.7239C5.97358 1.47385 6.31272 1.33337 6.66634 1.33337H9.33301C9.68663 1.33337 10.0258 1.47385 10.2758 1.7239C10.5259 1.97395 10.6663 2.31309 10.6663 2.66671V4.00004M12.6663 4.00004V13.3334C12.6663 13.687 12.5259 14.0261 12.2758 14.2762C12.0258 14.5262 11.6866 14.6667 11.333 14.6667H4.66634C4.31272 14.6667 3.97358 14.5262 3.72353 14.2762C3.47348 14.0261 3.33301 13.687 3.33301 13.3334V4.00004H12.6663Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span className="text-[12px] font-['Poppins',sans-serif]">Delete</span>
               </button>
@@ -517,6 +654,24 @@ const PurchaseOrderList = ({
           </div>
         </div>
       )}
+
+      {/* Edit Purchase Order Modal */}
+      <EditPurchaseOrderModal
+        isOpen={editModalOpen}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingPO(null);
+        }}
+        onSuccess={(updatedPO) => {
+          console.log('Purchase order updated:', updatedPO);
+          setEditModalOpen(false);
+          setEditingPO(null);
+          if (onRefresh) {
+            onRefresh();
+          }
+        }}
+        purchaseOrder={editingPO}
+      />
     </div>
   );
 };

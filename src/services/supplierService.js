@@ -160,11 +160,28 @@ const supplierService = {
       contactPerson: supplier.contactPerson || null,
       email: supplier.email,
       phone: supplier.phone || null,
-      address: supplier.address?.city || null,
+      // Preserve full address; also provide flattened fields for UI fallbacks
+      address: supplier.address ? {
+        street: supplier.address.street || '',
+        city: supplier.address.city || ''
+      } : null,
+      addressStreet: supplier.address?.street || '',
+      addressCity: supplier.address?.city || '',
       taxId: supplier.taxId || null,
+      // Preserve full bankAccount object
+      bankAccount: supplier.bankAccount ? {
+        bankName: supplier.bankAccount.bankName || '',
+        accountNumber: supplier.bankAccount.accountNumber || '',
+        accountName: supplier.bankAccount.accountName || '',
+        swiftCode: supplier.bankAccount.swiftCode || ''
+      } : null,
+      paymentTerms: supplier.paymentTerms || 'net30',
       creditLimit: supplier.creditLimit || 0,
       currentDebt: supplier.currentDebt || 0,
+      totalPurchaseAmount: supplier.totalPurchaseAmount || 0,
+      totalPurchaseOrders: supplier.totalPurchaseOrders || 0,
       rating: supplier.rating || 0,
+      notes: supplier.notes || '',
       isActive: supplier.isActive !== undefined ? supplier.isActive : true,
       createdAt: supplier.createdAt,
       updatedAt: supplier.updatedAt

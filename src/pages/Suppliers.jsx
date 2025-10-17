@@ -38,6 +38,10 @@ const Suppliers = () => {
   // Add Supplier Modal state
   const [addOpen, setAddOpen] = useState(false);
 
+  // Edit Supplier Modal state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingSupplier, setEditingSupplier] = useState(null);
+
   // Fetch suppliers from API
   const fetchSuppliers = async () => {
     try {
@@ -127,7 +131,7 @@ const Suppliers = () => {
       let bVal = b[field];
 
       // Handle different data types
-      if (field === 'creditLimit' || field === 'currentDebt') {
+      if (field === 'creditLimit' || field === 'currentDebt' || field === 'totalPurchaseAmount') {
         aVal = Number(aVal || 0);
         bVal = Number(bVal || 0);
       } else if (field === 'createdAt') {
@@ -148,6 +152,39 @@ const Suppliers = () => {
     setSuppliers(sorted);
   };
 
+  // Toggle active handler
+  const handleToggleActive = async (supplier) => {
+    try {
+      await supplierService.updateSupplier(supplier.id, { isActive: supplier.isActive === false ? true : false });
+      await fetchSuppliers();
+    } catch (e) {
+      console.error('Failed to toggle supplier active:', e);
+      alert(e.error || e.message || 'Failed to update supplier status');
+    }
+  };
+
+  // Delete supplier handler
+  const handleDeleteSupplier = async (supplier) => {
+    // Validation: must be inactive to delete
+    if (supplier.isActive !== false) {
+      alert('Cannot delete active supplier. Please deactivate it first.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete supplier ${supplier.companyName || supplier.supplierCode}?`)) {
+      return;
+    }
+
+    try {
+      await supplierService.deleteSupplier(supplier.id, true); // permanent delete
+      await fetchSuppliers();
+      // Optional: alert('Supplier deleted successfully!');
+    } catch (e) {
+      console.error('Failed to delete supplier:', e);
+      alert(e.error || e.message || 'Failed to delete supplier');
+    }
+  };
+
   // Handle add supplier
   const handleAddSupplier = () => {
     setAddOpen(true);
@@ -155,6 +192,18 @@ const Suppliers = () => {
 
   const handleAddSuccess = () => {
     setAddOpen(false);
+    fetchSuppliers();
+  };
+
+  // Handle edit supplier
+  const handleEditSupplier = (supplier) => {
+    setEditingSupplier(supplier);
+    setEditOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    setEditOpen(false);
+    setEditingSupplier(null);
     fetchSuppliers();
   };
 
@@ -206,6 +255,16 @@ const Suppliers = () => {
               addModalOpen={addOpen}
               onCloseAddModal={() => setAddOpen(false)}
               onAddSuccess={handleAddSuccess}
+              editModalOpen={editOpen}
+              editSupplier={editingSupplier}
+              onCloseEditModal={() => {
+                setEditOpen(false);
+                setEditingSupplier(null);
+              }}
+              onEditSuccess={handleEditSuccess}
+              onEdit={handleEditSupplier}
+              onToggleActive={handleToggleActive}
+              onDelete={handleDeleteSupplier}
             />
 
             {/* Pagination */}

@@ -172,6 +172,7 @@ const PurchaseOrders = () => {
           onSort={handleSort}
           sortField={sortField}
           sortOrder={sortOrder}
+          onRefresh={fetchPurchaseOrders}
         />
       </div>
     </Layout>

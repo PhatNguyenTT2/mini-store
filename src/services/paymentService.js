@@ -145,8 +145,21 @@ const paymentService = {
       // Backend uses 'paymentType' not 'type'
       const paymentType = payment.paymentType || 'sales';
 
-      // Backend stores relatedOrderNumber directly (cached field)
-      const relatedOrderNumber = payment.relatedOrderNumber || 'N/A';
+      // Get related order number with proper fallback logic
+      let relatedOrderNumber = payment.relatedOrderNumber;
+
+      // Fallback for payments that don't have cached relatedOrderNumber
+      if (!relatedOrderNumber) {
+        if (paymentType === 'purchase') {
+          // For purchase payments, try to get from populated purchaseOrder
+          relatedOrderNumber = payment.purchaseOrder?.poNumber ||
+            payment.purchaseOrder?.purchaseOrderNumber ||
+            'N/A';
+        } else {
+          // For sales payments, try to get from populated order
+          relatedOrderNumber = payment.order?.orderNumber || 'N/A';
+        }
+      }
 
       const formatted = {
         id: payment.id || payment._id,
@@ -172,7 +185,8 @@ const paymentService = {
         id: formatted.id,
         paymentNumber: formatted.paymentNumber,
         type: formatted.type,
-        relatedOrderNumber: formatted.relatedOrderNumber
+        relatedOrderNumber: formatted.relatedOrderNumber,
+        hasRelatedOrderNumber: !!payment.relatedOrderNumber
       });
 
       return formatted;
