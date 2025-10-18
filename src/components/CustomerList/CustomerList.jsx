@@ -120,7 +120,7 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder, onT
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container - overflow-x-auto allows horizontal scroll */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1200px]">
+        <div className="min-w-[1320px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* ID Column - Sortable */}
@@ -196,6 +196,17 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder, onT
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
                 Type
                 {getSortIcon('customerType')}
+              </p>
+            </div>
+
+            {/* Total Spent Column - Sortable */}
+            <div
+              className="w-[120px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={() => handleSortClick('totalSpent')}
+            >
+              <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
+                Total Spent
+                {getSortIcon('totalSpent')}
               </p>
             </div>
 
@@ -278,6 +289,13 @@ export const CustomerList = ({ customers = [], onSort, sortField, sortOrder, onT
                   <div className="w-[100px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] capitalize">
                       {customer.customerType || 'Regular'}
+                    </p>
+                  </div>
+
+                  {/* Total Spent */}
+                  <div className="w-[120px] px-3 flex items-center flex-shrink-0">
+                    <p className="text-[13px] font-semibold font-['Poppins',sans-serif] text-emerald-600 leading-[20px]">
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(customer.totalSpent || 0)}
                     </p>
                   </div>
 

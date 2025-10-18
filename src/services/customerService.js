@@ -119,6 +119,8 @@ const customerService = {
       dob: customer.dateOfBirth || customer.dob || null, // Backend uses dateOfBirth
       gender: customer.gender || null,
       customerType: customer.customerType || 'Regular',
+      totalSpent: customer.totalSpent || 0, // Total amount spent by customer
+      totalPurchases: customer.totalPurchases || 0, // Total number of purchases
       isActive: customer.isActive !== undefined ? customer.isActive : true,
       createdAt: customer.createdAt,
       updatedAt: customer.updatedAt

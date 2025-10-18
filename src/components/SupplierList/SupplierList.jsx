@@ -109,7 +109,7 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, add
     <div className="bg-white rounded-lg shadow-sm">
       {/* Scrollable Container - overflow-x-auto allows horizontal scroll */}
       <div className="overflow-x-auto rounded-lg">
-        <div className="min-w-[1180px]">
+        <div className="min-w-[1320px]">
           {/* Table Header */}
           <div className="flex items-center h-[34px] bg-gray-50 border-b border-gray-200">
             {/* ID Column - Sortable */}
@@ -125,7 +125,7 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, add
 
             {/* Name Column - Sortable */}
             <div
-              className="w-[160px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('companyName')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -136,7 +136,7 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, add
 
             {/* Email Column - Sortable */}
             <div
-              className="w-[180px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[200px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('email')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -147,7 +147,7 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, add
 
             {/* Phone Column - Sortable */}
             <div
-              className="w-[140px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
+              className="w-[110px] px-3 flex items-center flex-shrink-0 cursor-pointer hover:bg-gray-100 transition-colors"
               onClick={() => handleSortClick('phone')}
             >
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px] flex items-center">
@@ -157,7 +157,7 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, add
             </div>
 
             {/* Address Column */}
-            <div className="w-[240px] px-3 flex items-center flex-shrink-0">
+            <div className="flex-1 min-w-[180px] px-3 flex items-center">
               <p className="text-[11px] font-medium font-['Poppins',sans-serif] text-[#212529] uppercase tracking-[0.5px] leading-[18px]">
                 Address
               </p>
@@ -221,28 +221,28 @@ export const SupplierList = ({ suppliers = [], onSort, sortField, sortOrder, add
                   </div>
 
                   {/* Name */}
-                  <div className="w-[160px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                       {supplier.companyName}
                     </p>
                   </div>
 
                   {/* Email */}
-                  <div className="w-[180px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[200px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                       {supplier.email}
                     </p>
                   </div>
 
                   {/* Phone */}
-                  <div className="w-[140px] px-3 flex items-center flex-shrink-0">
+                  <div className="w-[110px] px-3 flex items-center flex-shrink-0">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                       {supplier.phone || 'N/A'}
                     </p>
                   </div>
 
                   {/* Address */}
-                  <div className="w-[240px] px-3 flex items-center flex-shrink-0">
+                  <div className="flex-1 min-w-[180px] px-3 flex items-center">
                     <p className="text-[13px] font-normal font-['Poppins',sans-serif] text-[#212529] leading-[20px] truncate">
                       {formatAddress(supplier)}
                     </p>
