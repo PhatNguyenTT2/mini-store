@@ -61,6 +61,22 @@ const orderService = {
   },
 
   /**
+   * Update order
+   * @param {string} id - Order ID
+   * @param {Object} orderData - Order data to update
+   * @returns {Promise} Updated order
+   */
+  updateOrder: async (id, orderData) => {
+    try {
+      const response = await api.put(`/orders/${id}`, orderData)
+      return response.data
+    } catch (error) {
+      console.error(`Error updating order ${id}:`, error)
+      throw error.response?.data || error
+    }
+  },
+
+  /**
    * Update order status
    * @param {string} id - Order ID
    * @param {string} status - New status
